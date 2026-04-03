@@ -1,22 +1,23 @@
+
 import os
 import streamlit as st
 
 def render_sidebar_brand():
-    st.markdown('<div class="brand-box">', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
     if os.path.exists("logoifce.png"):
         st.image("logoifce.png", width=110)
     elif os.path.exists("logo.png"):
         st.image("logo.png", width=110)
-    st.markdown('<div class="brand-title">Bridge to the Future</div>', unsafe_allow_html=True)
-    st.markdown('<div class="brand-sub">Plataforma educacional em evolução.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-title">Bridge to the Future</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-sub">Plataforma educacional em evolução.</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 def render_landing_screen(mentors: dict, on_open):
     st.markdown('<div class="landing-wrap">', unsafe_allow_html=True)
     if os.path.exists("logoifce.png"):
-        c1, c2, c3 = st.columns([1.5, 1.2, 1.5])
+        c1, c2, c3 = st.columns([1.4, 1.2, 1.4])
         with c2:
-            st.image("logoifce.png", width=150)
+            st.image("logoifce.png", width=160)
 
     st.markdown(
         """
@@ -45,74 +46,54 @@ def render_landing_screen(mentors: dict, on_open):
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button(f"Entrar em {name}", key=f"open_{name}", use_container_width=True):
-                on_open(name)
+            st.button(f"Entrar em {name}", key=f"open_{name}", use_container_width=True, on_click=on_open, args=(name,))
     st.markdown('</div>', unsafe_allow_html=True)
 
-def render_hero(project_title: str, subtitle: str, mentor_title: str, mentor_description: str, mentor_key: str):
-    col1, col2 = st.columns([4.2, 1.3])
-    with col1:
+def render_chat_header(project_title: str, subtitle: str, mentor_title: str, mentor_description: str, mentor_key: str):
+    left, right = st.columns([4.3, 1.2])
+    with left:
         st.markdown(
             f"""
-            <div class="hero-wrap">
-                <div class="hero-title">{project_title}</div>
-                <div class="hero-sub">{subtitle}</div>
-                <div class="mentor-highlight">
-                    <div class="mentor-highlight-title">{mentor_title}</div>
+            <div class="chat-header-card">
+                <div class="chat-title">{project_title}</div>
+                <div class="chat-sub">{subtitle}</div>
+                <div class="chat-mentor-box">
+                    <div class="chat-mentor-title">{mentor_title}</div>
                     <div class="small-muted">{mentor_description}</div>
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with col2:
+    with right:
         if os.path.exists("logoprojeto.png"):
             st.image("logoprojeto.png", use_container_width=True)
 
-def render_mentor_cards(mentors: dict, active_mentor: str):
-    cards = []
-    for name, data in mentors.items():
-        active_class = "mentor-card active" if name == active_mentor else "mentor-card"
-        cards.append(
-            f"""
-            <div class="{active_class}">
-                <div class="mentor-name">{data.get('emoji', '')} {name}</div>
-                <div class="mentor-desc">{data.get('description', '')}</div>
-            </div>
-            """
-        )
-    st.markdown(f'<div class="mentor-grid">{"".join(cards)}</div>', unsafe_allow_html=True)
-
-def render_chat_bubble(content: str, role: str = "assistant"):
-    css_class = "chat-user" if role == "user" else "chat-assistant"
-    st.markdown(f'<div class="{css_class}">{content}</div>', unsafe_allow_html=True)
-
-def render_context_box(file_name: str, file_type: str):
+def render_history_item(title: str, updated_at: str, active: bool):
+    css = "history-card active" if active else "history-card"
     st.markdown(
         f"""
-        <div class="context-box">
-            <div class="materials-title">Contexto ativo</div>
-            <div class="materials-sub"><b>Arquivo:</b> {file_name}<br><b>Tipo:</b> {file_type}</div>
+        <div class="{css}">
+            <div class="history-title">{title}</div>
+            <div class="history-meta">{updated_at[:16].replace('T', ' ')}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-def render_conversation_list(conversations, current_conversation_id, on_open):
-    if not conversations:
-        st.caption("Nenhuma conversa ainda.")
-        return
+def render_message(item: dict):
+    role = item.get("role", "assistant")
+    css = "message-card message-user" if role == "user" else "message-card message-assistant"
+    st.markdown(f'<div class="{css}">{item.get("content","")}</div>', unsafe_allow_html=True)
+    if item.get("image_path") and os.path.exists(item["image_path"]):
+        st.image(item["image_path"], use_container_width=True)
 
-    for item in conversations:
-        active_class = "history-card active" if item["id"] == current_conversation_id else "history-card"
-        st.markdown(
-            f"""
-            <div class="{active_class}">
-                <div class="history-title">{item['title']}</div>
-                <div class="history-meta">{item['updated_at'][:16].replace('T', ' ')}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if st.button("Abrir", key=f"open_conv_{item['id']}", use_container_width=True):
-            on_open(item["id"])
+def render_context_chip(file_name: str, file_type: str):
+    st.markdown(
+        f"""
+        <div class="context-chip">
+            <b>Contexto ativo:</b> {file_name} • {file_type}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
