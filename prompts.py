@@ -12,24 +12,34 @@ def normalize_text(text: str) -> str:
 
 
 def is_smalltalk(user_input: str) -> bool:
-    t = normalize_text(user_input)
-    t = t.rstrip("?!.,;:")
+    t = normalize_text(user_input).rstrip("?!.,;:")
 
     gatilhos_exatos = {
-        "oi", "olá", "ola", "oie",
+        "oi", "ola", "oie",
         "opa", "eae", "e ai",
         "fala", "fala cmg", "fala comigo",
         "bom dia", "boa tarde", "boa noite",
-        "tudo bem", "suave", "blz", "beleza"
+        "tudo bem", "suave", "blz", "beleza",
+        "salve", "hey", "hello"
     }
 
     if t in gatilhos_exatos:
         return True
 
-    if len(t) <= 15 and any(g in t for g in gatilhos_exatos):
+    if re.fullmatch(r"o+i+", t):      # oi, oii, oiii
+        return True
+
+    if re.fullmatch(r"o+i+e+", t):    # oie, oiee
+        return True
+
+    if re.fullmatch(r"opa+a*", t):    # opa, opaa
+        return True
+
+    if len(t) <= 18 and any(g in t for g in gatilhos_exatos):
         return True
 
     return False
+
 
 def build_prompt(
     user_input: str,
@@ -74,12 +84,12 @@ def build_prompt(
         )
 
     scope_block = (
-        f"Você está dentro do mestre de {mentor}. "
-        f"Se o pedido do usuário pertencer claramente a outra área, avise com educação que ele deve voltar à tela inicial e escolher outro mestre."
+        f"Você está dentro da área de {mentor}. "
+        f"Se o pedido do usuário pertencer claramente a outra área, avise com educação que ele deve voltar à tela inicial e escolher a área correta."
     )
 
     style_block = (
-        "Quando o input for simples e social, responda de forma curta, natural e humana. "
+        "Quando a entrada for só uma saudação ou conversa curta, responda de forma breve, natural e humana. "
         "Quando a dúvida for acadêmica, organize bem a resposta. "
         "Você pode usar humor leve e contextual ligado ao conteúdo estudado, mas sem exagerar."
     )
@@ -111,6 +121,7 @@ Regras de resposta:
 - Quando houver propriedade matemática ou física, diga por que ela vale naquele passo.
 - Não faça respostas gigantes para saudações simples.
 - Seja humano, direto e didático.
+- Evite soar como um texto institucional ou robótico.
 
 Estilo:
 {style_block}
