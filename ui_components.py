@@ -1,6 +1,6 @@
-
 import os
 import streamlit as st
+
 
 def render_sidebar_brand():
     st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
@@ -12,8 +12,10 @@ def render_sidebar_brand():
     st.markdown('<div class="sidebar-sub">Plataforma educacional em evolução.</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+
 def render_landing_screen(mentors: dict, on_open):
     st.markdown('<div class="landing-wrap">', unsafe_allow_html=True)
+
     if os.path.exists("logoifce.png"):
         c1, c2, c3 = st.columns([1.4, 1.2, 1.4])
         with c2:
@@ -34,6 +36,7 @@ def render_landing_screen(mentors: dict, on_open):
 
     cols = st.columns(2)
     mentor_items = list(mentors.items())
+
     for i, (name, data) in enumerate(mentor_items):
         with cols[i % 2]:
             st.markdown(
@@ -46,11 +49,20 @@ def render_landing_screen(mentors: dict, on_open):
                 """,
                 unsafe_allow_html=True,
             )
-            st.button(f"Entrar em {name}", key=f"open_{name}", use_container_width=True, on_click=on_open, args=(name,))
+            st.button(
+                f"Entrar em {name}",
+                key=f"open_{name}",
+                use_container_width=True,
+                on_click=on_open,
+                args=(name,),
+            )
+
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 def render_chat_header(project_title: str, subtitle: str, mentor_title: str, mentor_description: str, mentor_key: str):
     left, right = st.columns([4.3, 1.2])
+
     with left:
         st.markdown(
             f"""
@@ -65,9 +77,11 @@ def render_chat_header(project_title: str, subtitle: str, mentor_title: str, men
             """,
             unsafe_allow_html=True,
         )
+
     with right:
         if os.path.exists("logoprojeto.png"):
             st.image("logoprojeto.png", use_container_width=True)
+
 
 def render_history_item(title: str, updated_at: str, active: bool):
     css = "history-card active" if active else "history-card"
@@ -81,12 +95,19 @@ def render_history_item(title: str, updated_at: str, active: bool):
         unsafe_allow_html=True,
     )
 
+
 def render_message(item: dict):
     role = item.get("role", "assistant")
     css = "message-card message-user" if role == "user" else "message-card message-assistant"
-    st.markdown(f'<div class="{css}">{item.get("content","")}</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div class="{css}">{item.get("content", "")}</div>',
+        unsafe_allow_html=True,
+    )
+
     if item.get("image_path") and os.path.exists(item["image_path"]):
         st.image(item["image_path"], use_container_width=True)
+
 
 def render_context_chip(file_name: str, file_type: str):
     st.markdown(
