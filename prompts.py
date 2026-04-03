@@ -12,21 +12,19 @@ def normalize_text(text: str) -> str:
 
 
 def is_smalltalk(user_input: str) -> bool:
-    t = normalize_text(user_input)
+    t = normalize_text(user_input).strip("?.,;:")
 
-    gatilhos = [
+    gatilhos exatos = {
         "oi", "olá", "ola", "oie",
         "opa", "eae", "e aí",
         "fala", "fala cmg", "fala comigo",
         "bom dia", "boa tarde", "boa noite",
         "tudo bem", "suave", "blz", "beleza"
-    ]
-    # Se for só saudação curta
-    if t in gatilhos:
+    }
+    if t in gatilhosexatos:
         return true
 
-    # Se for pequeno E só contém saudação
-    if len(t) <= 15 and any(g in t for g in gatilhos):
+    if len(t) <= 15 and any(g in t for g in gatilhos_exatos):
         return true
 
     return false 
