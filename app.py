@@ -234,9 +234,13 @@ with main:
         st.session_state.chat_history.append(user_item)
         save_message(cid, "user", user_input)
 
+        # 1) tenta gerar gráfico primeiro
         graph_path = maybe_generate_graph(user_input, mentor)
 
-        if is_smalltalk(user_input):
+        # 2) decide a resposta
+        if graph_path:
+            resposta = "Aqui está o gráfico solicitado."
+        elif is_smalltalk(user_input):
             resposta = mentor_info["smalltalk"]
         else:
             try:
@@ -263,6 +267,7 @@ with main:
             "content": resposta,
             "image_path": graph_path,
         }
+
         st.session_state.chat_history.append(assistant_item)
         save_message(cid, "assistant", resposta, image_path=graph_path)
 
