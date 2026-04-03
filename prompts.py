@@ -1,3 +1,11 @@
+def is_smalltalk(user_input: str) -> bool:
+    t = (user_input or "").strip().lower()
+    small = {
+        "oi", "ola", "olá", "opa", "eai", "e aí", "bom dia", "boa tarde", "boa noite",
+        "tudo bem", "blz", "beleza", "salve", "oii", "hello"
+    }
+    return t in small
+
 from mentors import MENTORS
 
 def build_prompt(
@@ -42,9 +50,23 @@ def build_prompt(
             f"Analise visualmente essa imagem junto com o pedido do usuário."
         )
 
+    scope_block = (
+        f"Você está dentro do mentor de {mentor}. "
+        f"Se o pedido do usuário pertencer claramente a outro mentor, avise com educação que ele deve voltar à tela inicial e escolher outro mentor. "
+        f"Não responda como se estivesse em outro banco de dados."
+    )
+
+    style_block = (
+        "Quando o input for simples e social, responda de forma curta, natural e humana. "
+        "Quando a dúvida for acadêmica, organize bem a resposta. "
+        "Você pode usar humor leve e contextual ligado ao conteúdo estudado, mas sem exagerar."
+    )
+
     return f"""{system_prompt}
 
 {profile_block}
+
+{scope_block}
 
 Área selecionada: {mentor}
 
@@ -65,4 +87,9 @@ Regras de resposta:
 - Explique o significado antes de aplicar fórmulas importantes.
 - Quando houver caminho simples e caminho completo, separe claramente os dois.
 - Quando houver propriedade matemática ou física, diga por que ela vale naquele passo.
+- Não faça respostas gigantes para saudações simples.
+- Seja humano, direto e didático.
+
+Estilo:
+{style_block}
 """
