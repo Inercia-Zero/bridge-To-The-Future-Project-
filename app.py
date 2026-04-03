@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 
@@ -29,6 +28,7 @@ from materials import render_materials_admin
 from attachments import validate_upload, save_upload, extract_pdf_text
 from graph_tools import maybe_generate_graph
 
+
 st.set_page_config(
     page_title="Bridge to the Future",
     page_icon="🎓",
@@ -53,6 +53,7 @@ DEFAULTS = {
     "context_file_type": None,
     "context_text": None,
 }
+
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
         st.session_state[key] = value
@@ -183,10 +184,12 @@ with main:
     toolbar = st.container()
     with toolbar:
         t1, t2, t3 = st.columns([1.1, 1.2, 4.7])
+
         with t1:
             if st.button("📎 Anexar", use_container_width=True):
                 st.session_state.show_attach_panel = not st.session_state.show_attach_panel
                 st.rerun()
+
         with t2:
             if st.session_state.context_file_name and st.button("Remover", use_container_width=True):
                 st.session_state.context_file_path = None
@@ -211,6 +214,7 @@ with main:
                     st.session_state.context_file_path = file_path
                     st.session_state.context_file_name = file_name
                     st.session_state.context_file_type = file_type
+
                     if file_type == "pdf":
                         st.session_state.context_text = extract_pdf_text(file_path)
                     elif file_type == "text":
@@ -218,16 +222,17 @@ with main:
                             st.session_state.context_text = f.read()
                     else:
                         st.session_state.context_text = None
+
                     st.success(f"Arquivo ativo: {file_name}")
 
     user_input = st.chat_input(f"Converse com o mentor de {mentor.lower()}...")
 
     if user_input:
         cid = st.session_state.current_conversation_id
+
         user_item = {"role": "user", "content": user_input}
         st.session_state.chat_history.append(user_item)
         save_message(cid, "user", user_input)
-        render_message(user_item)
 
         graph_path = maybe_generate_graph(user_input, mentor)
 
@@ -244,14 +249,21 @@ with main:
                     context_file_name=st.session_state.context_file_name,
                     context_file_type=st.session_state.context_file_type,
                 )
+
                 if st.session_state.context_file_type == "image" and st.session_state.context_file_path:
                     resposta = ask_vision_ai(prompt, st.session_state.context_file_path)
                 else:
                     resposta = ask_ai(prompt)
+
             except Exception as e:
                 resposta = f"Erro ao gerar resposta: {e}"
 
-        assistant_item = {"role": "assistant", "content": resposta, "image_path": graph_path}
+        assistant_item = {
+            "role": "assistant",
+            "content": resposta,
+            "image_path": graph_path,
+        }
         st.session_state.chat_history.append(assistant_item)
         save_message(cid, "assistant", resposta, image_path=graph_path)
+
         st.rerun()
