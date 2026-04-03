@@ -12,9 +12,9 @@ def normalize_text(text: str) -> str:
 
 
 def is_smalltalk(user_input: str) -> bool:
-    t = normalize_text(user_input).strip("?.,;:")
+    t = normalize_text(user_input).strip("?!.,;:")
 
-    gatilhos exatos = {
+    gatilhos_exatos = {
         "oi", "olá", "ola", "oie",
         "opa", "eae", "e aí",
         "fala", "fala cmg", "fala comigo",
