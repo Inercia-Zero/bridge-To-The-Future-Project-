@@ -1,3 +1,4 @@
+
 import base64
 import os
 import streamlit as st
@@ -31,10 +32,7 @@ def ask_ai(prompt: str) -> str:
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "Você é um assistente acadêmico didático, humano e organizado. "
-                        "Responda em português do Brasil com clareza, boa estrutura e profundidade útil."
-                    ),
+                    "content": "Você é um assistente acadêmico didático, humano e organizado. Responda em português do Brasil com clareza, boa estrutura e profundidade útil.",
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -71,10 +69,7 @@ def ask_vision_ai(prompt: str, image_path: str) -> str:
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "Você é um assistente acadêmico didático. "
-                        "Analise a imagem com cuidado e responda em português do Brasil."
-                    ),
+                    "content": "Você é um assistente acadêmico didático. Analise a imagem com cuidado e responda em português do Brasil.",
                 },
                 {
                     "role": "user",
