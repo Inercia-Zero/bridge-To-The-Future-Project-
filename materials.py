@@ -4,7 +4,7 @@ import streamlit as st
 from attachments import validate_upload, save_upload
 from database import save_material_record, list_materials
 
-def render_materials_admin():
+def render_materials_admin(default_subject=None):
     st.markdown('<div class="materials-box">', unsafe_allow_html=True)
     st.markdown('<div class="materials-title">Base de conteúdos dos professores</div>', unsafe_allow_html=True)
     st.markdown(
@@ -16,7 +16,9 @@ def render_materials_admin():
         col1, col2 = st.columns(2)
         with col1:
             title = st.text_input("Título do material")
-            subject = st.selectbox("Área", ["Matemática", "Física", "Metodologia Científica", "Documentos Acadêmicos"])
+            subjects = ["Matemática", "Física", "Metodologia Científica", "Documentos Acadêmicos"]
+            idx = subjects.index(default_subject) if default_subject in subjects else 0
+            subject = st.selectbox("Área", subjects, index=idx)
         with col2:
             teacher_name = st.text_input("Professor(a)")
             tags = st.text_input("Tags (separadas por vírgula)")
@@ -53,7 +55,7 @@ def render_materials_admin():
                     st.success("Material salvo com sucesso.")
                     st.rerun()
 
-    rows = list_materials()
+    rows = list_materials(subject=default_subject)
     if rows:
         st.markdown("### Materiais já cadastrados")
         for row in rows:
