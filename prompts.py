@@ -1,6 +1,14 @@
 from mentors import MENTORS
 
-def build_prompt(user_input: str, mentor: str, history: list | None = None) -> str:
+def build_prompt(
+    user_input: str,
+    mentor: str,
+    profile: str = "Aluno",
+    history: list | None = None,
+    context_text: str | None = None,
+    context_file_name: str | None = None,
+    context_file_type: str | None = None,
+) -> str:
     mentor_data = MENTORS.get(mentor, {})
     system_prompt = mentor_data.get("system_prompt", "")
 
@@ -12,16 +20,49 @@ def build_prompt(user_input: str, mentor: str, history: list | None = None) -> s
             lines.append(f"{who}: {item['content']}")
         history_text = "\n".join(lines)
 
+    profile_block = (
+        "Você está falando com um PROFESSOR. Use linguagem técnica, organizada e objetiva."
+        if profile == "Professor"
+        else "Você está falando com um ALUNO. Use linguagem acolhedora, didática e passo a passo."
+    )
+
+    context_block = ""
+    if context_text:
+        context_block = (
+            f"Há um arquivo anexado nesta conversa.\n"
+            f"Nome: {context_file_name}\n"
+            f"Tipo: {context_file_type}\n"
+            f"Conteúdo extraído:\n{context_text[:4000]}"
+        )
+    elif context_file_type == "image":
+        context_block = (
+            f"Há uma imagem anexada nesta conversa.\n"
+            f"Nome: {context_file_name}\n"
+            f"Tipo: {context_file_type}\n"
+            f"Analise visualmente essa imagem junto com o pedido do usuário."
+        )
+
     return f"""{system_prompt}
+
+{profile_block}
 
 Área selecionada: {mentor}
 
 Histórico recente:
 {history_text if history_text else "Sem histórico anterior."}
 
+Contexto adicional:
+{context_block if context_block else "Sem arquivo adicional nesta conversa."}
+
 Pergunta do usuário:
 {user_input}
 
-Responda em português do Brasil, de forma clara, organizada e didática.
-Se houver fórmula, explique o significado antes de aplicar.
+Regras de resposta:
+- Responda em português do Brasil.
+- Organize a resposta com boa estrutura visual.
+- Se houver matemática ou física, use LaTeX válido.
+- Use $...$ para expressões curtas e $$...$$ para fórmulas destacadas.
+- Explique o significado antes de aplicar fórmulas importantes.
+- Quando houver caminho simples e caminho completo, separe claramente os dois.
+- Quando houver propriedade matemática ou física, diga por que ela vale naquele passo.
 """
