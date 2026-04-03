@@ -14,39 +14,22 @@ def normalize_text(text: str) -> str:
 def is_smalltalk(user_input: str) -> bool:
     t = normalize_text(user_input)
 
-    greetings = {
-        "oi",
-        "ola",
-        "opa",
-        "e ai",
-        "bom dia",
-        "boa tarde",
-        "boa noite",
-        "tudo bem",
-        "blz",
-        "beleza",
-        "salve",
-        "hello",
-        "hey",
-    }
+    gatilhos = [
+        "oi", "olá", "ola", "oie",
+        "opa", "eae", "e aí",
+        "fala", "fala cmg", "fala comigo",
+        "bom dia", "boa tarde", "boa noite",
+        "tudo bem", "suave", "blz", "beleza"
+    ]
+    # Se for só saudação curta
+    if t in gatilhos:
+        return true
 
-    if t in greetings:
-        return True
+    # Se for pequeno E só contém saudação
+    if len(t) <= 15 and any(g in t for g in gatilhos):
+        return true
 
-    if re.fullmatch(r"o+i+", t):
-        return True
-
-    if re.fullmatch(r"o+i+e+", t):
-        return True
-
-    if re.fullmatch(r"opa+a*", t):
-        return True
-
-    if re.fullmatch(r"e+a+i+", t.replace(" ", "")):
-        return True
-
-    return False
-
+    return false 
 
 def build_prompt(
     user_input: str,
