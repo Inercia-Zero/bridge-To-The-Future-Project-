@@ -1,13 +1,52 @@
+import re
+import unicodedata
+from mentors import MENTORS
+
+
+def normalize_text(text: str) -> str:
+    text = (text or "").strip().lower()
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
 
 def is_smalltalk(user_input: str) -> bool:
-    t = (user_input or "").strip().lower()
-    small = {
-        "oi", "ola", "olá", "opa", "eai", "e aí", "bom dia", "boa tarde", "boa noite",
-        "tudo bem", "blz", "beleza", "salve", "oii", "hello"
-    }
-    return t in small
+    t = normalize_text(user_input)
 
-from mentors import MENTORS
+    greetings = {
+        "oi",
+        "ola",
+        "opa",
+        "e ai",
+        "bom dia",
+        "boa tarde",
+        "boa noite",
+        "tudo bem",
+        "blz",
+        "beleza",
+        "salve",
+        "hello",
+        "hey",
+    }
+
+    if t in greetings:
+        return True
+
+    if re.fullmatch(r"o+i+", t):
+        return True
+
+    if re.fullmatch(r"o+i+e+", t):
+        return True
+
+    if re.fullmatch(r"opa+a*", t):
+        return True
+
+    if re.fullmatch(r"e+a+i+", t.replace(" ", "")):
+        return True
+
+    return False
+
 
 def build_prompt(
     user_input: str,
@@ -52,8 +91,14 @@ def build_prompt(
         )
 
     scope_block = (
-        f"Você está dentro do mentor de {mentor}. "
-        f"Se o pedido do usuário pertencer claramente a outro mentor, avise com educação que ele deve voltar à tela inicial e escolher outro mentor."
+        f"Você está dentro do mestre de {mentor}. "
+        f"Se o pedido do usuário pertencer claramente a outra área, avise com educação que ele deve voltar à tela inicial e escolher outro mestre."
+    )
+
+    style_block = (
+        "Quando o input for simples e social, responda de forma curta, natural e humana. "
+        "Quando a dúvida for acadêmica, organize bem a resposta. "
+        "Você pode usar humor leve e contextual ligado ao conteúdo estudado, mas sem exagerar."
     )
 
     return f"""{system_prompt}
@@ -83,4 +128,7 @@ Regras de resposta:
 - Quando houver propriedade matemática ou física, diga por que ela vale naquele passo.
 - Não faça respostas gigantes para saudações simples.
 - Seja humano, direto e didático.
+
+Estilo:
+{style_block}
 """
