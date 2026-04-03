@@ -21,7 +21,7 @@ def is_smalltalk(user_input: str) -> bool:
         "bom dia", "boa tarde", "boa noite",
         "tudo bem", "suave", "blz", "beleza"
     }
-    if t in gatilhosexatos:
+    if t in gatilhos_exatos:
         return true
 
     if len(t) <= 15 and any(g in t for g in gatilhos_exatos):
