@@ -1,3 +1,4 @@
+
 import sqlite3
 from pathlib import Path
 from datetime import datetime
@@ -146,9 +147,7 @@ def save_message(conversation_id: int, role: str, content: str, image_path=None)
     )
     cur.execute(
         """
-        UPDATE conversations
-        SET updated_at = ?
-        WHERE id = ?
+        UPDATE conversations SET updated_at = ? WHERE id = ?
         """,
         (ts, conversation_id),
     )
