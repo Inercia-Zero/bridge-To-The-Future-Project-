@@ -21,6 +21,7 @@ def is_smalltalk(user_input: str) -> bool:
         "bom dia", "boa tarde", "boa noite",
         "tudo bem", "suave", "blz", "beleza"
     }
+    
     if t in gatilhos_exatos:
         return true
 
