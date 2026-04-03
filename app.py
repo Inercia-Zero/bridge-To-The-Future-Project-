@@ -1,4 +1,5 @@
 import os
+import random
 import streamlit as st
 
 from theme import apply_theme
@@ -269,8 +270,16 @@ with main:
             resposta = geometry_caption or "Aqui está a demonstração visual."
 
         elif is_smalltalk(user_input):
-            resposta = "Oi! Tudo bem? 😊 Em que posso te ajudar?"
-
+            respostas = [
+                "E aí! Bora estudar o quê?",
+                "Fala! O que você quer aprender hoje?",
+                "Manda a dúvida 😄",
+                "Bora! Qual é o desafio?",
+                "Pode perguntar sem medo 👊",
+                "Aqui não tem erro... só cálculo 😂"
+            ]
+            resposta = random.choice(respostas)
+            
         else:
             try:
                 prompt = build_prompt(
