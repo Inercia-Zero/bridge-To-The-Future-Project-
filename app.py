@@ -4,7 +4,7 @@ import streamlit as st
 
 from theme import apply_theme
 from mentors import MENTORS
-from database import (
+from db_core import (
     init_db,
     init_materials_table,
     ensure_default_conversation,
