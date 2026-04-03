@@ -21,7 +21,7 @@ def validate_upload(uploaded_file) -> Optional[str]:
             return f"O PDF excede o limite de {MAX_PDF_MB} MB."
         return None
 
-    allowed = (".png", ".jpg", ".jpeg", ".webp", ".txt")
+    allowed = (".png", ".jpg", ".jpeg", ".webp", ".txt", ".pdf")
     if not name.endswith(allowed):
         return "Envie PDF, imagem (PNG/JPG/WEBP) ou TXT."
 
