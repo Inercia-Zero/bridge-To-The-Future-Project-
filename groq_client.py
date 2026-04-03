@@ -38,7 +38,7 @@ def ask_ai(prompt: str) -> str:
                 },
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.3,
+            temperature=0.28,
             max_tokens=1000,
         )
         text = (resp.choices[0].message.content or "").strip()
