@@ -12,23 +12,24 @@ def normalize_text(text: str) -> str:
 
 
 def is_smalltalk(user_input: str) -> bool:
-    t = normalize_text(user_input).strip("?!.,;:")
+    t = normalize_text(user_input)
+    t = t.rstrip("?!.,;:")
 
     gatilhos_exatos = {
         "oi", "olá", "ola", "oie",
-        "opa", "eae", "e aí",
+        "opa", "eae", "e ai",
         "fala", "fala cmg", "fala comigo",
         "bom dia", "boa tarde", "boa noite",
         "tudo bem", "suave", "blz", "beleza"
     }
-    
+
     if t in gatilhos_exatos:
-        return true
+        return True
 
     if len(t) <= 15 and any(g in t for g in gatilhos_exatos):
-        return true
+        return True
 
-    return false 
+    return False
 
 def build_prompt(
     user_input: str,
