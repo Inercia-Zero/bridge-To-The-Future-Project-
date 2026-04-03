@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 
-DB_PATH = Path("bridge_to_the_future.db")
+DB_PATH = Path("bridge_to_the_future_v3.db")
 
 
 def now_iso():
