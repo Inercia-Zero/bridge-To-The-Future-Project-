@@ -1,3 +1,4 @@
+
 from datetime import datetime
 import streamlit as st
 
@@ -5,12 +6,9 @@ from attachments import validate_upload, save_upload
 from database import save_material_record, list_materials
 
 def render_materials_admin(default_subject=None):
-    st.markdown('<div class="materials-box">', unsafe_allow_html=True)
-    st.markdown('<div class="materials-title">Base de conteúdos dos professores</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="materials-sub">Alimente o sistema com slides, listas, provas, PDFs, roteiros e materiais internos.</div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown('<div class="materials-card">', unsafe_allow_html=True)
+    st.markdown("### Base de conteúdos dos professores")
+    st.caption("Alimente o sistema com slides, listas, provas, PDFs, roteiros e materiais internos.")
 
     with st.form("materials_form"):
         col1, col2 = st.columns(2)
@@ -57,19 +55,11 @@ def render_materials_admin(default_subject=None):
 
     rows = list_materials(subject=default_subject)
     if rows:
-        st.markdown("### Materiais já cadastrados")
+        st.markdown("#### Materiais já cadastrados")
         for row in rows:
-            st.markdown(
-                f"""
-                <div class="mentor-card">
-                    <div class="mentor-name">{row['title']}</div>
-                    <div class="mentor-desc"><b>Área:</b> {row['subject']} | <b>Professor:</b> {row['teacher_name'] or 'Não informado'}</div>
-                    <div class="mentor-desc" style="margin-top:8px;">{row['description'] or 'Sem descrição.'}</div>
-                    <div class="mentor-desc" style="margin-top:8px;"><b>Tipo:</b> {row['file_type']} | <b>Tags:</b> {row['tags'] or '-'}</div>
-                    <div class="mentor-desc" style="margin-top:6px;"><b>Enviado em:</b> {row['uploaded_at']}</div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            st.markdown(f"**{row['title']}**")
+            st.caption(f"{row['subject']} • {row['teacher_name'] or 'Não informado'} • {row['file_type']}")
+            st.write(row['description'] or "Sem descrição.")
+            st.markdown("---")
 
     st.markdown('</div>', unsafe_allow_html=True)
