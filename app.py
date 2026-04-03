@@ -273,7 +273,7 @@ with main:
         elif geometry_path:
             resposta = geometry_caption or "Aqui está a demonstração visual."
         elif is_smalltalk(user_input):
-            resposta = mentor_info["smalltalk"]
+            resposta = "Oi! Tudo bem? 😊 Em que posso te ajudar?"
         else:
             try:
                 prompt = build_prompt(
