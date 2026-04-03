@@ -102,7 +102,7 @@ if "profile" not in st.session_state:
 # =========================
 # SIDEBAR
 # =========================
-st.sidebar.image("logo.png", use_container_width=True)
+st.sidebar.image("logoifce.png", use_container_width=True)
 st.sidebar.markdown("## MentorEdu")
 
 # perfil
