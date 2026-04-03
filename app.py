@@ -27,7 +27,7 @@ from ui_components import (
 from materials import render_materials_admin
 from attachments import validate_upload, save_upload, extract_pdf_text
 from graph_tools import maybe_generate_graph
-
+from geometry_tools import maybe_generate_geometry_visual
 
 st.set_page_config(
     page_title="Bridge to the Future",
@@ -52,8 +52,14 @@ DEFAULTS = {
     "context_file_name": None,
     "context_file_type": None,
     "context_text": None,
+    "last_graph_context": {
+        "mode": None,
+        "function": None,
+        "points": None,
+        "linked": False,
+        "mentor": None,
+    },
 }
-
 for key, value in DEFAULTS.items():
     if key not in st.session_state:
         st.session_state[key] = value
@@ -71,6 +77,13 @@ def open_mentor(mentor: str):
     st.session_state.context_file_name = None
     st.session_state.context_file_type = None
     st.session_state.context_text = None
+    st.session_state.last_graph_context = {
+        "mode": None,
+        "function": None,
+        "points": None,
+        "linked": False,
+        "mentor": mentor,
+    }
     st.rerun()
 
 
@@ -115,7 +128,7 @@ with sidebar:
         "Perfil",
         ["Aluno", "Professor"],
         horizontal=True,
-        key="profile_radio_v3",
+        key="profile_radio_visual",
     )
 
     c1, c2 = st.columns(2)
@@ -127,6 +140,13 @@ with sidebar:
             new_id = create_new_conversation(mentor)
             st.session_state.current_conversation_id = new_id
             st.session_state.chat_history = []
+            st.session_state.last_graph_context = {
+                "mode": None,
+                "function": None,
+                "points": None,
+                "linked": False,
+                "mentor": mentor,
+            }
             st.rerun()
 
     st.markdown("### Histórico")
@@ -176,14 +196,12 @@ with main:
             st.session_state.context_file_type,
         )
 
-    chat_box = st.container()
-    with chat_box:
-        for item in st.session_state.chat_history:
-            render_message(item)
+    for item in st.session_state.chat_history:
+        render_message(item)
 
     toolbar = st.container()
     with toolbar:
-        t1, t2, t3 = st.columns([1.1, 1.2, 4.7])
+        t1, t2, _ = st.columns([1.1, 1.2, 4.7])
 
         with t1:
             if st.button("📎 Anexar", use_container_width=True):
@@ -214,7 +232,6 @@ with main:
                     st.session_state.context_file_path = file_path
                     st.session_state.context_file_name = file_name
                     st.session_state.context_file_type = file_type
-
                     if file_type == "pdf":
                         st.session_state.context_text = extract_pdf_text(file_path)
                     elif file_type == "text":
@@ -222,7 +239,6 @@ with main:
                             st.session_state.context_text = f.read()
                     else:
                         st.session_state.context_text = None
-
                     st.success(f"Arquivo ativo: {file_name}")
 
     user_input = st.chat_input(f"Converse com o mentor de {mentor.lower()}...")
@@ -234,12 +250,28 @@ with main:
         st.session_state.chat_history.append(user_item)
         save_message(cid, "user", user_input)
 
-        # 1) tenta gerar gráfico primeiro
-        graph_path = maybe_generate_graph(user_input, mentor)
+        graph_path, graph_meta = maybe_generate_graph(
+            user_input=user_input,
+            mentor=mentor,
+            last_context=st.session_state.last_graph_context,
+        )
 
-        # 2) decide a resposta
+        geometry_path, geometry_caption = maybe_generate_geometry_visual(
+            user_input=user_input,
+            mentor=mentor,
+        )
+
         if graph_path:
-            resposta = "Aqui está o gráfico solicitado."
+            st.session_state.last_graph_context = {
+                "mode": graph_meta.get("mode"),
+                "function": graph_meta.get("function"),
+                "points": graph_meta.get("points"),
+                "linked": graph_meta.get("linked", False),
+                "mentor": mentor,
+            }
+            resposta = graph_meta.get("message", "Aqui está o gráfico solicitado.")
+        elif geometry_path:
+            resposta = geometry_caption or "Aqui está a demonstração visual."
         elif is_smalltalk(user_input):
             resposta = mentor_info["smalltalk"]
         else:
@@ -253,22 +285,20 @@ with main:
                     context_file_name=st.session_state.context_file_name,
                     context_file_type=st.session_state.context_file_type,
                 )
-
                 if st.session_state.context_file_type == "image" and st.session_state.context_file_path:
                     resposta = ask_vision_ai(prompt, st.session_state.context_file_path)
                 else:
                     resposta = ask_ai(prompt)
-
             except Exception as e:
                 resposta = f"Erro ao gerar resposta: {e}"
+
+        image_path = graph_path or geometry_path
 
         assistant_item = {
             "role": "assistant",
             "content": resposta,
-            "image_path": graph_path,
+            "image_path": image_path,
         }
-
         st.session_state.chat_history.append(assistant_item)
-        save_message(cid, "assistant", resposta, image_path=graph_path)
-
+        save_message(cid, "assistant", resposta, image_path=image_path)
         st.rerun()
