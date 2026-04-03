@@ -21,15 +21,13 @@ def _plot_function(expr_text: str):
     expr_text = expr_text.replace("f(x)=", "").replace("y=", "").replace(" ", "")
     expr = sp.sympify(expr_text)
     f = sp.lambdify(x, expr, "numpy")
-
     xs = np.linspace(-10, 10, 500)
     ys = f(xs)
-
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(xs, ys, linewidth=2)
     ax.axhline(0, linewidth=1)
     ax.axvline(0, linewidth=1)
-    ax.set_title(f"Gráfico de y = {sp.latex(expr)}")
+    ax.set_title("Gráfico da função")
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.grid(True, alpha=0.3)
