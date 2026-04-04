@@ -106,12 +106,12 @@ def go_to_masters():
 
 
 def open_area(area: str):
-    subject_key = get_user_subject_key(area)
+    subject_key = area
 
     st.session_state.selected_area = area
     st.session_state.page = "chat"
 
-    cid = ensure_default_conversation(subject_key)
+    cid = ensure_default_conversation(area)
     st.session_state.current_conversation_id = cid
     st.session_state.chat_history = load_messages_for_conversation(cid)
 
@@ -288,7 +288,7 @@ def render_chat_screen():
     subject_key = get_user_subject_key(area)
 
     if st.session_state.current_conversation_id is None:
-        cid = get_active_conversation_id(subject_key) or ensure_default_conversation(subject_key)
+        cid = get_active_conversation_id(area) or ensure_default_conversation(subject_key)
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
@@ -307,14 +307,14 @@ def render_chat_screen():
 
         with c2:
             if st.button("Nova", use_container_width=True):
-                new_id = create_new_conversation(subject_key)
+                new_id = create_new_conversation(area)
                 st.session_state.current_conversation_id = new_id
                 st.session_state.chat_history = []
                 st.rerun()
 
         st.markdown("### Histórico")
 
-        conversations = list_conversations_by_mentor(subject_key)
+        conversations = list_conversations_by_mentor(area)
         if not conversations:
             st.caption("Nenhuma conversa ainda.")
         else:
