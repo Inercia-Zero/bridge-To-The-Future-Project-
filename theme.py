@@ -14,11 +14,12 @@ def apply_theme():
             --border: #3a3a3a;
             --text: #ececec;
             --muted: #b3b3b3;
-            --accent: #a67c52;
-            --accent-hover: #b58963;
-            --accent-soft: rgba(166,124,82,0.16);
-            --user: #2f2924;
-            --assistant: #2a2a2a;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --warm: #6f4e37;
+            --warm-2: #8b5e3c;
+            --user: #2563eb;
+            --assistant: #1e293b;
             --shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
             --radius-xl: 24px;
             --radius-lg: 18px;
@@ -87,50 +88,37 @@ def apply_theme():
         .stTextArea textarea:focus,
         [data-testid="stChatInput"] textarea:focus,
         [data-testid="stChatInput"] input:focus {
-            border-color: rgba(166,124,82,0.55) !important;
-            box-shadow: 0 0 0 1px rgba(166,124,82,0.18) !important;
+            border-color: rgba(59,130,246,0.55) !important;
+            box-shadow: 0 0 0 1px rgba(59,130,246,0.18) !important;
         }
 
         /* Buttons */
         .stButton > button {
-            border-radius: 14px !important;
-            border: 1px solid rgba(255,255,255,0.05) !important;
-            background: #3a312a !important;
-            color: var(--text) !important;
-            font-weight: 700 !important;
-            padding: 0.64rem 1rem !important;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.20);
-            transition: all 0.18s ease;
+            background: linear-gradient(135deg, var(--warm), var(--warm-2)) !important;
+            color: white !important;
+            border-radius: 12px !important;
+            padding: 10px 14px !important;
+            font-weight: 600 !important;
+            border: none !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.20);
         }
 
         .stButton > button:hover {
-            background: #46382d !important;
-            border-color: rgba(166,124,82,0.28) !important;
             transform: translateY(-1px);
-        }
-
-        /* Primary accent buttons look a bit warmer when focused/active */
-        .stButton > button:focus,
-        .stButton > button:active {
-            box-shadow: 0 0 0 1px rgba(166,124,82,0.18) !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+            filter: brightness(1.06);
         }
 
         div[role="radiogroup"] {
             gap: 0.45rem;
         }
 
-        /* Generic cards */
-        .sidebar-card,
-        .history-card,
-        .chat-header-card,
-        .context-chip,
-        .landing-card {
+        /* Sidebar */
+        .sidebar-card {
             background: var(--panel);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-        }
-
-        .sidebar-card {
             border-radius: var(--radius-lg);
             padding: 14px;
             margin-bottom: 16px;
@@ -183,15 +171,18 @@ def apply_theme():
         }
 
         .landing-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 14px;
             margin-bottom: 12px;
             transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            box-shadow: var(--shadow);
         }
 
         .landing-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(166,124,82,0.34);
+            border-color: rgba(59,130,246,0.34);
             box-shadow: 0 18px 36px rgba(0,0,0,0.30);
         }
 
@@ -208,14 +199,20 @@ def apply_theme():
         .landing-image-fallback {
             width: 100%;
             min-height: 180px;
-            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+
+        .landing-fallback-inner {
+            font-size: 2.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
-            background: var(--panel-2);
-            border: 1px dashed rgba(255,255,255,0.10);
-            margin-bottom: 12px;
+            height: 180px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.22);
         }
 
         .landing-name {
@@ -240,14 +237,17 @@ def apply_theme():
 
         /* History */
         .history-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 10px 12px;
             margin-bottom: 8px;
+            box-shadow: var(--shadow);
         }
 
         .history-card.active {
             background: #332b25 !important;
-            border-color: rgba(166,124,82,0.32) !important;
+            border-color: rgba(111,78,55,0.45) !important;
         }
 
         .history-title {
@@ -265,9 +265,11 @@ def apply_theme():
         /* Chat header */
         .chat-header-card {
             background: linear-gradient(135deg, #2a2a2a 0%, #242424 100%);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 22px;
             margin-bottom: 14px;
+            box-shadow: var(--shadow);
         }
 
         .chat-title {
@@ -302,32 +304,39 @@ def apply_theme():
 
         /* Messages */
         .message-card {
-            border-radius: 18px;
-            padding: 14px 16px;
-            margin-bottom: 12px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            max-width: 75%;
             border: 1px solid var(--border);
             box-shadow: 0 6px 16px rgba(0,0,0,0.18);
             line-height: 1.65;
             font-size: 0.98rem;
             white-space: pre-wrap;
             word-wrap: break-word;
-            color: var(--text) !important;
         }
 
         .message-user {
             background: var(--user) !important;
+            color: white !important;
+            margin-left: auto;
         }
 
         .message-assistant {
             background: var(--assistant) !important;
+            color: #e2e8f0 !important;
+            margin-right: auto;
         }
 
         /* Context chip */
         .context-chip {
+            background: var(--panel);
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 12px 14px;
             margin-bottom: 14px;
             color: var(--text);
+            box-shadow: var(--shadow);
         }
 
         /* Expander */
@@ -352,7 +361,7 @@ def apply_theme():
         }
 
         a {
-            color: #d2ab82 !important;
+            color: #93c5fd !important;
         }
 
         hr {
