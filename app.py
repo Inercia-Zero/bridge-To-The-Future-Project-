@@ -122,8 +122,14 @@ def suggest_area_from_text(user_text: str):
         return "Matemática"
     if any(k in t for k in ["física", "fisica", "mru", "mruv", "força", "forca", "energia", "movimento"]):
         return "Física"
-    if any(k in t for k in ["metodologia", "pesquisa", "artigo", "projeto científico", "projeto cientifico", "hipótese", "hipotese"]):
-        return "Metodologia Científica"
+    if any(k in t for k in [
+    "metodologia", "pesquisa", "artigo", "projeto científico",
+    "projeto cientifico", "projeto", "projeto pessoal",
+    "hipótese", "hipotese", "tema", "objetivo",
+    "justificativa", "problema de pesquisa",
+    "referencial", "iniciacao cientifica", "iniciação científica"
+]):
+    return "Metodologia Científica"
     if any(k in t for k in ["abnt", "relatório", "relatorio", "currículo", "curriculo", "resumo", "documento"]):
         return "Documentos Acadêmicos"
 
