@@ -134,19 +134,8 @@ def suggest_area_from_text(user_text: str):
 # UI AUXILIAR
 # =========================================================
 def render_top_brand():
-    col1, col2 = st.columns([1.1, 4.2], gap="medium")
-
-    with col1:
-        if os.path.exists("logoifce.png"):
-            st.image("logoifce.png", width=130)
-
-    with col2:
-        if os.path.exists("logoprojeto.png"):
-            st.image("logoprojeto.png", width=130)
-
     st.markdown("## Bridge to the Future")
     st.caption("Projeto educacional para estudantes da rede pública.")
-
 
 # =========================================================
 # TELA 1 - ENTRADA
