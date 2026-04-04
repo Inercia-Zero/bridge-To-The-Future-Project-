@@ -9,7 +9,7 @@ def render_sidebar_brand():
     st.markdown('</div>', unsafe_allow_html=True)
 
 
-def render_landing_screen(mentors: dict, on_open):
+def render_landing_screen(masters: dict, on_open):
     st.markdown('<div class="landing-wrap">', unsafe_allow_html=True)
 
     st.markdown(
@@ -26,9 +26,9 @@ def render_landing_screen(mentors: dict, on_open):
     )
 
     cols = st.columns(2)
-    mentor_items = list(mentors.items())
+    master_items = list(masters.items())
 
-    for i, (name, data) in enumerate(mentor_items):
+    for i, (name, data) in enumerate(master_items):
         with cols[i % 2]:
             st.markdown('<div class="landing-card">', unsafe_allow_html=True)
 
@@ -47,7 +47,7 @@ def render_landing_screen(mentors: dict, on_open):
 
             st.markdown(
                 f"""
-                <div class="landing-name">{name}</div>
+                <div class="landing-name">{data.get('title', name)}</div>
                 <div class="landing-desc">{data.get('description', '')}</div>
                 """,
                 unsafe_allow_html=True,
@@ -55,26 +55,26 @@ def render_landing_screen(mentors: dict, on_open):
 
             st.markdown('</div>', unsafe_allow_html=True)
 
-            st.button(
+            if st.button(
                 f"Entrar em {name}",
                 key=f"open_{name}",
                 use_container_width=True,
-                on_click=on_open,
-                args=(name,),
-            )
+            ):
+                on_open(name)
+                st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 
-def render_chat_header(project_title: str, subtitle: str, mentor_title: str, mentor_description: str, mentor_key: str):
+def render_chat_header(project_title: str, subtitle: str, master_title: str, master_description: str, master_key: str):
     st.markdown(
         f"""
         <div class="chat-header-card">
             <div class="chat-title">{project_title}</div>
             <div class="chat-sub">{subtitle}</div>
             <div class="chat-mentor-box">
-                <div class="chat-mentor-title">{mentor_title}</div>
-                <div class="small-muted">{mentor_description}</div>
+                <div class="chat-mentor-title">{master_title}</div>
+                <div class="small-muted">{master_description}</div>
             </div>
         </div>
         """,
