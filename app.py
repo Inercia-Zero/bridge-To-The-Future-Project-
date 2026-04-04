@@ -4,7 +4,7 @@ import streamlit as st
 
 from theme import apply_theme
 from prompts import build_prompt, is_smalltalk
-from masters import MASTERS  # se ainda estiver usando mentors.py, troque aqui
+from masters import MASTERS 
 from groq_client import ask_ai, ask_vision_ai
 from db_core import (
     init_db,
