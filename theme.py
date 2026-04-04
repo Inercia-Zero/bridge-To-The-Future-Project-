@@ -374,6 +374,42 @@ def apply_theme():
         hr {
             border-color: var(--border) !important;
         }
+
+        /* =========================================
+           REMOVE TUDO DO STREAMLIT
+        ========================================= */
+
+        #MainMenu {
+            display: none !important;
+        }
+
+        [data-testid="stStatusWidget"] {
+            display: none !important;
+        }
+
+        header {
+            display: none !important;
+        }
+
+        [data-testid="stToolbar"] {
+            display: none !important;
+        }
+
+        [data-testid="stDecoration"] {
+            display: none !important;
+        }
+
+        footer {
+            display: none !important;
+        }
+
+        button[kind="header"] {
+            display: none !important;
+        }
+
+        div[data-testid="stToolbar"] {
+            display: none !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
