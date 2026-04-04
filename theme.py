@@ -5,6 +5,8 @@ def apply_theme():
     st.markdown(
         """
         <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
         :root {
             --bg: #171717;
             --bg-2: #1d1d1d;
@@ -43,13 +45,14 @@ def apply_theme():
         }
 
         html, body, [class*="css"] {
-            font-family: "Inter", "Segoe UI", sans-serif;
+            font-family: "Manrope", "Segoe UI", sans-serif;
             color: var(--text);
         }
 
         h1, h2, h3, h4, h5, h6 {
             color: var(--text) !important;
             letter-spacing: -0.02em;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         p, div, span, label {
@@ -108,6 +111,7 @@ def apply_theme():
             border: 1px solid #424242 !important;
             transition: all 0.18s ease !important;
             box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         .stButton > button:hover {
