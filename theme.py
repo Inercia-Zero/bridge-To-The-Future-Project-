@@ -7,18 +7,19 @@ def apply_theme():
         <style>
         :root {
             --bg: #212121;
-            --bg-soft: #262626;
+            --bg-2: #1b1b1b;
             --panel: #2a2a2a;
             --panel-2: #303030;
             --panel-3: #383838;
             --border: #3a3a3a;
             --text: #ececec;
-            --muted: #b8b8b8;
+            --muted: #b3b3b3;
             --accent: #a67c52;
             --accent-hover: #b58963;
-            --user: #2f2a26;
+            --accent-soft: rgba(166,124,82,0.16);
+            --user: #2f2924;
             --assistant: #2a2a2a;
-            --shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+            --shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
             --radius-xl: 24px;
             --radius-lg: 18px;
             --radius-md: 14px;
@@ -31,13 +32,13 @@ def apply_theme():
 
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(255,255,255,0.025), transparent 20%),
-                linear-gradient(180deg, #212121 0%, #1c1c1c 100%) !important;
+                radial-gradient(circle at top left, rgba(255,255,255,0.02), transparent 22%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%) !important;
         }
 
         .block-container {
             max-width: 1280px;
-            padding-top: 1.2rem;
+            padding-top: 1rem;
             padding-bottom: 2rem;
         }
 
@@ -56,7 +57,6 @@ def apply_theme():
             line-height: 1.5;
         }
 
-        /* Streamlit base */
         [data-testid="stAppViewContainer"] {
             background: transparent !important;
         }
@@ -66,7 +66,7 @@ def apply_theme():
         }
 
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #1e1e1e 0%, #232323 100%) !important;
+            background: linear-gradient(180deg, #1f1f1f 0%, #252525 100%) !important;
             border-right: 1px solid var(--border);
         }
 
@@ -87,7 +87,7 @@ def apply_theme():
         .stTextArea textarea:focus,
         [data-testid="stChatInput"] textarea:focus,
         [data-testid="stChatInput"] input:focus {
-            border-color: rgba(166,124,82,0.5) !important;
+            border-color: rgba(166,124,82,0.55) !important;
             box-shadow: 0 0 0 1px rgba(166,124,82,0.18) !important;
         }
 
@@ -95,21 +95,26 @@ def apply_theme():
         .stButton > button {
             border-radius: 14px !important;
             border: 1px solid rgba(255,255,255,0.05) !important;
-            background: linear-gradient(180deg, var(--accent) 0%, #8f6745 100%) !important;
-            color: white !important;
+            background: #3a312a !important;
+            color: var(--text) !important;
             font-weight: 700 !important;
             padding: 0.64rem 1rem !important;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.24);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.20);
             transition: all 0.18s ease;
         }
 
         .stButton > button:hover {
-            background: linear-gradient(180deg, var(--accent-hover) 0%, #9a724f 100%) !important;
+            background: #46382d !important;
+            border-color: rgba(166,124,82,0.28) !important;
             transform: translateY(-1px);
-            box-shadow: 0 12px 26px rgba(0,0,0,0.30);
         }
 
-        /* Radio */
+        /* Primary accent buttons look a bit warmer when focused/active */
+        .stButton > button:focus,
+        .stButton > button:active {
+            box-shadow: 0 0 0 1px rgba(166,124,82,0.18) !important;
+        }
+
         div[role="radiogroup"] {
             gap: 0.45rem;
         }
@@ -132,7 +137,7 @@ def apply_theme():
         }
 
         .sidebar-title {
-            font-size: 1.2rem;
+            font-size: 1.18rem;
             font-weight: 900;
             color: var(--text);
             margin-bottom: 6px;
@@ -151,7 +156,7 @@ def apply_theme():
         }
 
         .landing-hero {
-            background: linear-gradient(135deg, #2a2a2a 0%, #242424 100%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #252525 100%);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             padding: 28px;
@@ -161,7 +166,7 @@ def apply_theme():
         }
 
         .landing-title {
-            font-size: 2.4rem;
+            font-size: 2.3rem;
             font-weight: 900;
             color: var(--text);
             line-height: 1.08;
@@ -186,7 +191,7 @@ def apply_theme():
 
         .landing-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(166,124,82,0.35);
+            border-color: rgba(166,124,82,0.34);
             box-shadow: 0 18px 36px rgba(0,0,0,0.30);
         }
 
@@ -194,7 +199,7 @@ def apply_theme():
             width: 100%;
             border-radius: 16px;
             margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.05);
             display: block;
             filter: brightness(0.94);
             box-shadow: 0 10px 22px rgba(0,0,0,0.22);
@@ -213,13 +218,8 @@ def apply_theme():
             margin-bottom: 12px;
         }
 
-        .landing-emoji {
-            font-size: 2.4rem;
-            margin-bottom: 10px;
-        }
-
         .landing-name {
-            font-size: 1.16rem;
+            font-size: 1.14rem;
             font-weight: 800;
             color: var(--text) !important;
             margin-bottom: 6px;
@@ -232,7 +232,7 @@ def apply_theme():
             line-height: 1.55;
         }
 
-        /* Info / success boxes from Streamlit */
+        /* Alerts */
         [data-testid="stAlert"] {
             border-radius: 14px !important;
             border: 1px solid var(--border) !important;
@@ -246,8 +246,8 @@ def apply_theme():
         }
 
         .history-card.active {
-            background: #332a24 !important;
-            border-color: rgba(166,124,82,0.35) !important;
+            background: #332b25 !important;
+            border-color: rgba(166,124,82,0.32) !important;
         }
 
         .history-title {
@@ -264,7 +264,7 @@ def apply_theme():
 
         /* Chat header */
         .chat-header-card {
-            background: linear-gradient(135deg, #2b2b2b 0%, #242424 100%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #242424 100%);
             border-radius: var(--radius-xl);
             padding: 22px;
             margin-bottom: 14px;
@@ -351,12 +351,10 @@ def apply_theme():
             border-radius: 18px;
         }
 
-        /* Markdown links / misc */
         a {
             color: #d2ab82 !important;
         }
 
-        /* Hide weird bright separators if any */
         hr {
             border-color: var(--border) !important;
         }
