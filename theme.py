@@ -364,7 +364,7 @@ def apply_theme():
         }
 
         /* =========================================
-           MENSAGENS
+           MENSAGENS HTML CUSTOM
         ========================================= */
         .message-card,
         .message-user,
@@ -476,6 +476,73 @@ def apply_theme():
             border: 1px solid #4a4a4a !important;
             box-shadow: none !important;
             outline: none !important;
+        }
+
+        /* =========================================
+           CHAT NATIVO DO STREAMLIT - LIMPEZA
+        ========================================= */
+        [data-testid="stChatMessage"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.2rem !important;
+        }
+
+        [data-testid="stChatMessage"] > div {
+            background: transparent !important;
+        }
+
+        [data-testid="stChatMessageAvatar"] {
+            display: none !important;
+        }
+
+        [data-testid="stChatMessageContent"] {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            background: transparent !important;
+        }
+
+        [data-testid="stChatMessageContent"] p,
+        [data-testid="stChatMessageContent"] div,
+        [data-testid="stChatMessageContent"] span,
+        [data-testid="stChatMessageContent"] li {
+            color: var(--text) !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
+        }
+
+        [data-testid="stChatMessageContent"] code {
+            background: #2a2a2a !important;
+            color: #f5f5f5 !important;
+            border-radius: 8px !important;
+            padding: 0.15rem 0.35rem !important;
+        }
+
+        [data-testid="stChatMessageContent"] [data-testid="stMarkdownContainer"] {
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+
+        [data-testid="stChatMessageContent"] [data-testid="stImage"] {
+            margin-top: 0.5rem !important;
+        }
+
+        [data-testid="stChatMessageContainer"] {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        /* camada mais forte para matar azulado */
+        [data-testid="stVerticalBlock"] [data-testid="stChatMessage"] {
+            background: transparent !important;
+        }
+
+        [data-testid="stChatMessageContent"] > div {
+            background: #1f1f1f !important;
+            border: 1px solid var(--border-soft) !important;
+            border-radius: 16px !important;
+            padding: 14px 18px !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.16) !important;
         }
 
         /* =========================================
