@@ -3,7 +3,7 @@ from datetime import datetime
 import streamlit as st
 
 from attachments import validate_upload, save_upload
-from db_core import save_material_record, list_materials
+from db_core import add_material, list_materials
 
 def render_materials_admin(default_subject=None):
     st.markdown('<div class="materials-card">', unsafe_allow_html=True)
