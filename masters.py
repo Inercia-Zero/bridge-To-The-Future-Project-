@@ -2,8 +2,9 @@ MASTERS = {
     "Matemática": {
         "title": "Mestre da Matemática",
         "description": "Especialista em funções, álgebra, geometria e raciocínio lógico.",
-        "image": "assets/math.png",  # depois você cria essa imagem
+        "image": "assets/math.png",
         "color": "#C8A97E",
+        "emoji": "∑",
         "keywords": [
             "função", "equação", "matemática", "cálculo",
             "derivada", "integral", "log", "trigonometria"
@@ -15,8 +16,9 @@ MASTERS = {
         "description": "Movimento, forças, energia e os fenômenos do universo.",
         "image": "assets/physics.png",
         "color": "#7E9EC8",
+        "emoji": "Φ",
         "keywords": [
-            "mru", "muv", "força", "energia",
+            "mru", "mruv", "força", "energia",
             "velocidade", "aceleração", "newton", "física"
         ]
     },
@@ -26,24 +28,10 @@ MASTERS = {
         "description": "Aprenda a construir pesquisas, projetos e pensamento científico.",
         "image": "assets/science.png",
         "color": "#7EC8A3",
+        "emoji": "Δ",
         "keywords": [
             "projeto", "projeto pessoal", "pesquisa",
             "hipótese", "hipotese", "tema",
             "objetivo", "justificativa",
             "metodologia", "artigo",
-            "iniciação científica", "referencial"
-        ]
-    },
-
-    "Documentos Acadêmicos": {
-        "title": "Mestre de Documentos Acadêmicos",
-        "description": "Formatação ABNT, escrita acadêmica e produção de trabalhos.",
-        "image": "assets/abnt.png",
-        "color": "#C87E7E",
-        "keywords": [
-            "abnt", "trabalho", "formatação",
-            "referência", "citação", "artigo",
-            "tcc", "normas"
-        ]
-    }
-}
+            "inicia
