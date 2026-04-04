@@ -61,7 +61,6 @@ def render_landing_screen(masters: dict, on_open):
                 use_container_width=True,
             ):
                 on_open(name)
-                st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
