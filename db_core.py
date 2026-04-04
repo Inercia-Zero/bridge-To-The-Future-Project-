@@ -18,22 +18,23 @@ def init_db():
     conn = get_conn()
     cursor = conn.cursor()
 
-    # conversations
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS conversations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL DEFAULT 'Nova conversa',
             subject TEXT NOT NULL DEFAULT 'Geral',
+            owner_username TEXT NOT NULL DEFAULT 'global',
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )
     """)
 
-    # compatibilidade com banco antigo
     if not _column_exists(cursor, "conversations", "subject"):
         cursor.execute("ALTER TABLE conversations ADD COLUMN subject TEXT NOT NULL DEFAULT 'Geral'")
 
-    # messages
+    if not _column_exists(cursor, "conversations", "owner_username"):
+        cursor.execute("ALTER TABLE conversations ADD COLUMN owner_username TEXT NOT NULL DEFAULT 'global'")
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,17 +78,17 @@ def init_materials_table():
 # =========================================================
 # CONVERSAS
 # =========================================================
-def ensure_default_conversation(subject: str) -> int:
+def ensure_default_conversation(subject: str, owner_username: str) -> int:
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT id
         FROM conversations
-        WHERE subject = ?
+        WHERE subject = ? AND owner_username = ?
         ORDER BY updated_at DESC
         LIMIT 1
-    """, (subject,))
+    """, (subject, owner_username))
 
     row = cursor.fetchone()
 
@@ -96,9 +97,9 @@ def ensure_default_conversation(subject: str) -> int:
     else:
         now = datetime.now().isoformat()
         cursor.execute("""
-            INSERT INTO conversations (title, subject, created_at, updated_at)
-            VALUES (?, ?, ?, ?)
-        """, ("Nova conversa", subject, now, now))
+            INSERT INTO conversations (title, subject, owner_username, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, ("Nova conversa", subject, owner_username, now, now))
         conn.commit()
         conv_id = cursor.lastrowid
 
@@ -106,17 +107,17 @@ def ensure_default_conversation(subject: str) -> int:
     return conv_id
 
 
-def get_active_conversation_id(subject: str):
+def get_active_conversation_id(subject: str, owner_username: str):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT id
         FROM conversations
-        WHERE subject = ?
+        WHERE subject = ? AND owner_username = ?
         ORDER BY updated_at DESC
         LIMIT 1
-    """, (subject,))
+    """, (subject, owner_username))
 
     row = cursor.fetchone()
     conn.close()
@@ -124,16 +125,16 @@ def get_active_conversation_id(subject: str):
     return row[0] if row else None
 
 
-def list_conversations_by_mentor(subject: str):
+def list_conversations_by_mentor(subject: str, owner_username: str):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, title, subject, created_at, updated_at
+        SELECT id, title, subject, owner_username, created_at, updated_at
         FROM conversations
-        WHERE subject = ?
+        WHERE subject = ? AND owner_username = ?
         ORDER BY updated_at DESC
-    """, (subject,))
+    """, (subject, owner_username))
 
     rows = cursor.fetchall()
     conn.close()
@@ -143,23 +144,24 @@ def list_conversations_by_mentor(subject: str):
             "id": row[0],
             "title": row[1],
             "subject": row[2],
-            "created_at": row[3],
-            "updated_at": row[4],
+            "owner_username": row[3],
+            "created_at": row[4],
+            "updated_at": row[5],
         }
         for row in rows
     ]
 
 
-def create_new_conversation(subject: str, title: str = "Nova conversa") -> int:
+def create_new_conversation(subject: str, owner_username: str, title: str = "Nova conversa") -> int:
     conn = get_conn()
     cursor = conn.cursor()
 
     now = datetime.now().isoformat()
 
     cursor.execute("""
-        INSERT INTO conversations (title, subject, created_at, updated_at)
-        VALUES (?, ?, ?, ?)
-    """, (title, subject, now, now))
+        INSERT INTO conversations (title, subject, owner_username, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (title, subject, owner_username, now, now))
 
     conn.commit()
     conv_id = cursor.lastrowid
