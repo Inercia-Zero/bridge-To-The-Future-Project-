@@ -1,4 +1,4 @@
-MENTORS = {
+MASTERS = {
     "Matemática": {
         "emoji": "📐",
         "title": "Mestre de Matemática",
