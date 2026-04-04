@@ -288,7 +288,7 @@ def render_chat_screen():
     subject_key = get_user_subject_key(area)
 
     if st.session_state.current_conversation_id is None:
-        cid = get_active_conversation_id(area) or ensure_default_conversation(subject_key)
+        cid = get_active_conversation_id(area) or ensure_default_conversation(area)
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
