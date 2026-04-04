@@ -6,198 +6,127 @@ def apply_theme():
         """
         <style>
         :root {
-            --bg: #f5efe6;
-            --panel: rgba(255, 255, 255, 0.72);
-            --panel-strong: rgba(255, 250, 243, 0.96);
-            --border: rgba(120, 90, 60, 0.16);
-            --text: #3d2f24;
-            --muted: #7b6758;
+            --bg: #212121;
+            --bg-soft: #262626;
+            --panel: #2a2a2a;
+            --panel-2: #303030;
+            --panel-3: #383838;
+            --border: #3a3a3a;
+            --text: #ececec;
+            --muted: #b8b8b8;
             --accent: #a67c52;
-            --accent-2: #8d6b49;
-            --user: #efe3d3;
-            --assistant: #ffffff;
-            --shadow: 0 10px 30px rgba(80, 55, 30, 0.08);
+            --accent-hover: #b58963;
+            --user: #2f2a26;
+            --assistant: #2a2a2a;
+            --shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
             --radius-xl: 24px;
             --radius-lg: 18px;
             --radius-md: 14px;
         }
 
-        html, body, [class*="css"] {
-            font-family: "Inter", "Segoe UI", sans-serif;
+        html, body, .stApp {
+            background: var(--bg) !important;
+            color: var(--text) !important;
         }
 
         .stApp {
             background:
-                radial-gradient(circle at top left, rgba(255,255,255,0.65), transparent 30%),
-                linear-gradient(180deg, #f9f3ea 0%, #f3eadf 100%);
-            color: var(--text);
+                radial-gradient(circle at top left, rgba(255,255,255,0.025), transparent 20%),
+                linear-gradient(180deg, #212121 0%, #1c1c1c 100%) !important;
         }
 
         .block-container {
-            padding-top: 1.4rem;
-            padding-bottom: 2rem;
             max-width: 1280px;
+            padding-top: 1.2rem;
+            padding-bottom: 2rem;
         }
 
-        /* ========= TEXTOS GERAIS ========= */
-        h1, h2, h3, h4, h5, h6 {
+        html, body, [class*="css"] {
+            font-family: "Inter", "Segoe UI", sans-serif;
             color: var(--text);
-            letter-spacing: -0.02em;
         }
 
-        p, li, div, span, label {
+        h1, h2, h3, h4, h5, h6, p, div, span, label {
             color: var(--text);
         }
 
         .small-muted {
-            color: var(--muted);
+            color: var(--muted) !important;
             font-size: 0.94rem;
             line-height: 1.5;
         }
 
-        /* ========= INPUTS ========= */
+        /* Streamlit base */
+        [data-testid="stAppViewContainer"] {
+            background: transparent !important;
+        }
+
+        [data-testid="stHeader"] {
+            background: transparent !important;
+        }
+
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #1e1e1e 0%, #232323 100%) !important;
+            border-right: 1px solid var(--border);
+        }
+
+        /* Inputs */
         .stTextInput input,
         .stTextArea textarea,
+        .stNumberInput input,
         .stSelectbox div[data-baseweb="select"] > div,
-        .stNumberInput input {
-            background: rgba(255,255,255,0.82) !important;
+        [data-testid="stChatInput"] textarea,
+        [data-testid="stChatInput"] input {
+            background: var(--panel) !important;
+            color: var(--text) !important;
             border: 1px solid var(--border) !important;
             border-radius: 14px !important;
-            color: var(--text) !important;
         }
 
         .stTextInput input:focus,
-        .stTextArea textarea:focus {
-            border-color: rgba(166,124,82,0.4) !important;
+        .stTextArea textarea:focus,
+        [data-testid="stChatInput"] textarea:focus,
+        [data-testid="stChatInput"] input:focus {
+            border-color: rgba(166,124,82,0.5) !important;
             box-shadow: 0 0 0 1px rgba(166,124,82,0.18) !important;
         }
 
-        /* ========= BOTÕES ========= */
+        /* Buttons */
         .stButton > button {
             border-radius: 14px !important;
-            border: 1px solid rgba(120,90,60,0.14) !important;
-            background: linear-gradient(180deg, #a98763 0%, #967251 100%) !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            background: linear-gradient(180deg, var(--accent) 0%, #8f6745 100%) !important;
             color: white !important;
             font-weight: 700 !important;
-            padding: 0.62rem 1rem !important;
-            box-shadow: 0 6px 18px rgba(120, 90, 60, 0.12);
+            padding: 0.64rem 1rem !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.24);
             transition: all 0.18s ease;
         }
 
         .stButton > button:hover {
+            background: linear-gradient(180deg, var(--accent-hover) 0%, #9a724f 100%) !important;
             transform: translateY(-1px);
-            filter: brightness(1.03);
-            box-shadow: 0 10px 24px rgba(120,90,60,0.16);
+            box-shadow: 0 12px 26px rgba(0,0,0,0.30);
         }
 
-        .stButton > button:active {
-            transform: translateY(0);
-        }
-
-        /* ========= RADIO ========= */
+        /* Radio */
         div[role="radiogroup"] {
-            gap: 0.4rem;
+            gap: 0.45rem;
         }
 
-        /* ========= LANDING ========= */
-        .landing-wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-        }
-
-        .landing-hero {
-            background: linear-gradient(135deg, rgba(255,250,243,0.96) 0%, rgba(236,221,204,0.9) 100%);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            padding: 28px 28px;
-            margin-bottom: 18px;
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-
-        .landing-title {
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--text);
-            line-height: 1.1;
-            margin-bottom: 10px;
-            letter-spacing: -0.04em;
-        }
-
-        .landing-sub {
-            font-size: 1rem;
-            color: var(--muted);
-            max-width: 760px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
+        /* Generic cards */
+        .sidebar-card,
+        .history-card,
+        .chat-header-card,
+        .context-chip,
         .landing-card {
             background: var(--panel);
             border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 16px;
             box-shadow: var(--shadow);
-            margin-bottom: 12px;
-            min-height: 100%;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-
-        .landing-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 32px rgba(80, 55, 30, 0.12);
-        }
-
-        .landing-card img {
-            width: 100%;
-            border-radius: 18px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(120,90,60,0.10);
-            box-shadow: 0 8px 20px rgba(40, 25, 15, 0.08);
-        }
-
-        .landing-image-fallback {
-            width: 100%;
-            min-height: 180px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            background: rgba(255,255,255,0.55);
-            border: 1px dashed rgba(120,90,60,0.18);
-            margin-bottom: 12px;
-        }
-
-        .landing-emoji {
-            font-size: 2.6rem;
-            margin-bottom: 10px;
-        }
-
-        .landing-name {
-            font-size: 1.24rem;
-            font-weight: 800;
-            color: var(--text);
-            margin-bottom: 6px;
-            line-height: 1.25;
-        }
-
-        .landing-desc {
-            color: var(--muted);
-            font-size: 0.98rem;
-            line-height: 1.55;
-        }
-
-        /* ========= SIDEBAR ========= */
-        section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, rgba(255,249,242,0.98) 0%, rgba(242,232,219,0.96) 100%);
-            border-right: 1px solid rgba(120,90,60,0.08);
         }
 
         .sidebar-card {
-            background: rgba(255,255,255,0.45);
-            border: 1px solid rgba(120,90,60,0.12);
-            border-radius: 18px;
+            border-radius: var(--radius-lg);
             padding: 14px;
             margin-bottom: 16px;
         }
@@ -206,7 +135,6 @@ def apply_theme():
             font-size: 1.2rem;
             font-weight: 900;
             color: var(--text);
-            line-height: 1.1;
             margin-bottom: 6px;
         }
 
@@ -216,24 +144,115 @@ def apply_theme():
             line-height: 1.45;
         }
 
+        /* Landing */
+        .landing-wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .landing-hero {
+            background: linear-gradient(135deg, #2a2a2a 0%, #242424 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .landing-title {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1.08;
+            margin-bottom: 10px;
+            letter-spacing: -0.04em;
+        }
+
+        .landing-sub {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .landing-card {
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            margin-bottom: 12px;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .landing-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(166,124,82,0.35);
+            box-shadow: 0 18px 36px rgba(0,0,0,0.30);
+        }
+
+        .landing-card img {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: block;
+            filter: brightness(0.94);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+        }
+
+        .landing-image-fallback {
+            width: 100%;
+            min-height: 180px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            background: var(--panel-2);
+            border: 1px dashed rgba(255,255,255,0.10);
+            margin-bottom: 12px;
+        }
+
+        .landing-emoji {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+        }
+
+        .landing-name {
+            font-size: 1.16rem;
+            font-weight: 800;
+            color: var(--text) !important;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .landing-desc {
+            color: var(--muted) !important;
+            font-size: 0.96rem;
+            line-height: 1.55;
+        }
+
+        /* Info / success boxes from Streamlit */
+        [data-testid="stAlert"] {
+            border-radius: 14px !important;
+            border: 1px solid var(--border) !important;
+        }
+
+        /* History */
         .history-card {
-            background: rgba(255,255,255,0.62);
-            border: 1px solid rgba(120,90,60,0.12);
             border-radius: 14px;
             padding: 10px 12px;
             margin-bottom: 8px;
-            box-shadow: 0 4px 12px rgba(80,55,30,0.05);
         }
 
         .history-card.active {
-            background: rgba(166,124,82,0.16);
-            border-color: rgba(166,124,82,0.28);
+            background: #332a24 !important;
+            border-color: rgba(166,124,82,0.35) !important;
         }
 
         .history-title {
             font-weight: 700;
             font-size: 0.95rem;
-            line-height: 1.3;
             color: var(--text);
             margin-bottom: 4px;
         }
@@ -243,14 +262,12 @@ def apply_theme():
             color: var(--muted);
         }
 
-        /* ========= HEADER DO CHAT ========= */
+        /* Chat header */
         .chat-header-card {
-            background: linear-gradient(135deg, rgba(255,250,243,0.97) 0%, rgba(238,225,210,0.92) 100%);
-            border: 1px solid var(--border);
+            background: linear-gradient(135deg, #2b2b2b 0%, #242424 100%);
             border-radius: var(--radius-xl);
             padding: 22px;
             margin-bottom: 14px;
-            box-shadow: var(--shadow);
         }
 
         .chat-title {
@@ -270,8 +287,8 @@ def apply_theme():
         }
 
         .chat-mentor-box {
-            background: rgba(255,255,255,0.72);
-            border: 1px solid rgba(120,90,60,0.10);
+            background: var(--panel-2);
+            border: 1px solid var(--border);
             border-radius: 16px;
             padding: 14px;
         }
@@ -283,147 +300,65 @@ def apply_theme():
             color: var(--text);
         }
 
-        /* ========= MENSAGENS ========= */
+        /* Messages */
         .message-card {
             border-radius: 18px;
             padding: 14px 16px;
             margin-bottom: 12px;
-            border: 1px solid rgba(120,90,60,0.10);
-            box-shadow: 0 6px 18px rgba(80,55,30,0.06);
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.18);
             line-height: 1.65;
             font-size: 0.98rem;
             white-space: pre-wrap;
             word-wrap: break-word;
+            color: var(--text) !important;
         }
 
         .message-user {
-            background: var(--user);
+            background: var(--user) !important;
         }
 
         .message-assistant {
-            background: var(--assistant);
+            background: var(--assistant) !important;
         }
 
-        /* ========= CHIPS / CONTEXTO ========= */
+        /* Context chip */
         .context-chip {
-            background: rgba(255,255,255,0.68);
-            border: 1px solid rgba(120,90,60,0.14);
             border-radius: 14px;
             padding: 12px 14px;
             margin-bottom: 14px;
-            box-shadow: 0 4px 12px rgba(80,55,30,0.05);
             color: var(--text);
         }
 
-        /* ========= EXPANDER ========= */
+        /* Expander */
         .streamlit-expanderHeader {
-            background: rgba(255,255,255,0.45);
-            border-radius: 12px;
+            background: var(--panel) !important;
+            border-radius: 12px !important;
+            color: var(--text) !important;
+            border: 1px solid var(--border) !important;
         }
 
-        /* ========= FILE UPLOADER ========= */
+        /* File uploader */
         [data-testid="stFileUploader"] {
-            background: rgba(255,255,255,0.55);
-            border: 1px dashed rgba(120,90,60,0.22);
+            background: var(--panel);
+            border: 1px dashed rgba(255,255,255,0.12);
             border-radius: 16px;
             padding: 10px;
         }
 
-        /* ========= CHAT INPUT ========= */
-        [data-testid="stChatInput"] {
-            margin-top: 10px;
-        }
-
-        [data-testid="stChatInput"] textarea,
-        [data-testid="stChatInput"] input {
-            background: rgba(255,255,255,0.85) !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(120,90,60,0.14) !important;
-        }
-
-        /* ========= IMAGENS DENTRO DO CHAT ========= */
+        /* Images */
         [data-testid="stImage"] img {
             border-radius: 18px;
         }
 
-        /* ========= TEMA ESCURO CONTROLADO ========= */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #141414;
-                --panel: rgba(32, 32, 32, 0.88);
-                --panel-strong: rgba(24, 24, 24, 0.96);
-                --border: rgba(255,255,255,0.08);
-                --text: #f5f0ea;
-                --muted: #c5b8a9;
-                --accent: #c49a6c;
-                --accent-2: #ad8359;
-                --user: #2a211b;
-                --assistant: #1f1b18;
-                --shadow: 0 10px 26px rgba(0,0,0,0.28);
-            }
+        /* Markdown links / misc */
+        a {
+            color: #d2ab82 !important;
+        }
 
-            .stApp {
-                background:
-                    radial-gradient(circle at top left, rgba(255,255,255,0.03), transparent 26%),
-                    linear-gradient(180deg, #141414 0%, #1b1816 100%);
-                color: var(--text);
-            }
-
-            section[data-testid="stSidebar"] {
-                background: linear-gradient(180deg, rgba(22,22,22,0.96) 0%, rgba(28,24,22,0.96) 100%);
-                border-right: 1px solid rgba(255,255,255,0.05);
-            }
-
-            .landing-hero,
-            .chat-header-card,
-            .sidebar-card,
-            .landing-card,
-            .history-card,
-            .context-chip,
-            .message-card,
-            .chat-mentor-box {
-                background: rgba(26, 23, 21, 0.92) !important;
-                color: var(--text) !important;
-                border-color: rgba(255,255,255,0.08) !important;
-            }
-
-            .landing-sub,
-            .landing-desc,
-            .chat-sub,
-            .sidebar-sub,
-            .history-meta,
-            .small-muted {
-                color: var(--muted) !important;
-            }
-
-            .landing-image-fallback {
-                background: rgba(255,255,255,0.04);
-                border: 1px dashed rgba(255,255,255,0.10);
-            }
-
-            .stTextInput input,
-            .stTextArea textarea,
-            .stSelectbox div[data-baseweb="select"] > div,
-            .stNumberInput input,
-            [data-testid="stChatInput"] textarea,
-            [data-testid="stChatInput"] input {
-                background: rgba(28,28,28,0.95) !important;
-                color: var(--text) !important;
-                border-color: rgba(255,255,255,0.08) !important;
-            }
-
-            .stButton > button {
-                background: linear-gradient(180deg, #b58963 0%, #986f4d 100%) !important;
-                border-color: rgba(255,255,255,0.05) !important;
-            }
-
-            .message-user {
-                background: #2a211b !important;
-            }
-
-            .message-assistant {
-                background: #1c1917 !important;
-            }
+        /* Hide weird bright separators if any */
+        hr {
+            border-color: var(--border) !important;
         }
         </style>
         """,
