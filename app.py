@@ -37,7 +37,15 @@ apply_theme()
 init_db()
 init_materials_table()
 
-PROFESSOR_PASSWORD = "1234"  # troque depois
+
+# =========================================================
+# ACESSOS
+# =========================================================
+USERS = {
+    "adenilson": "1234",
+    "orlando": "1234",
+    "francisco": "1234",
+}
 
 
 # =========================================================
@@ -45,10 +53,8 @@ PROFESSOR_PASSWORD = "1234"  # troque depois
 # =========================================================
 DEFAULTS = {
     "page": "welcome",   # welcome | masters | chat
-    "user_role": "Aluno",
+    "logged": False,
     "display_name": "",
-    "professor_password_input": "",
-    "professor_authenticated": False,
     "selected_area": None,
     "welcome_search_text": "",
     "current_conversation_id": None,
@@ -71,14 +77,22 @@ for key, value in DEFAULTS.items():
 # =========================================================
 def greeting_reply():
     respostas = [
-        "E aí! Bora estudar o quê?",
-        "Fala! O que você quer aprender hoje?",
-        "Manda a dúvida 😄",
-        "Bora! Qual é o desafio?",
-        "Pode perguntar sem medo 👊",
-        "Aqui não tem erro... só cálculo 😂",
+        "E aí! Bora planejar algo bom?",
+        "Fala! O que você quer montar hoje?",
+        "Manda a ideia 😄",
+        "Bora! Qual conteúdo?",
+        "Pode mandar 👊",
     ]
     return random.choice(respostas)
+
+
+def login_ok(username: str, password: str) -> bool:
+    return USERS.get((username or "").strip().lower()) == password
+
+
+def get_user_subject_key(area: str) -> str:
+    user = (st.session_state.display_name or "").strip().lower()
+    return f"{area}__{user}"
 
 
 def go_to_welcome():
@@ -92,10 +106,12 @@ def go_to_masters():
 
 
 def open_area(area: str):
+    subject_key = get_user_subject_key(area)
+
     st.session_state.selected_area = area
     st.session_state.page = "chat"
 
-    cid = ensure_default_conversation(area)
+    cid = ensure_default_conversation(subject_key)
     st.session_state.current_conversation_id = cid
     st.session_state.chat_history = load_messages_for_conversation(cid)
 
@@ -131,7 +147,7 @@ def suggest_area_from_text(user_text: str):
     if any(k in t for k in [
         "física", "fisica", "mru", "mruv", "força", "forca",
         "energia", "movimento", "velocidade", "aceleração", "aceleracao",
-        "gravidade", "newton"
+        "gravidade", "newton", "projétil", "projetil"
     ]):
         return "Física"
 
@@ -158,47 +174,42 @@ def suggest_area_from_text(user_text: str):
 # UI AUXILIAR
 # =========================================================
 def render_top_brand():
-    st.markdown("## Bridge to the Future")
-    st.caption("Projeto educacional para estudantes da rede pública.")
+    st.markdown(
+        """
+        <div style="text-align:center; margin-top: 24px; margin-bottom: 6px;">
+            <div style="font-size: 2.6rem; font-weight: 900;">Bridge to the Future</div>
+            <div style="opacity: 0.75; margin-top: 6px;">
+                Projeto educacional para docentes da rede pública
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # =========================================================
-# TELA 1 - ENTRADA
+# TELA 1 - ACESSO
 # =========================================================
 def render_welcome_screen():
     st.markdown("<div style='max-width: 980px; margin: 0 auto;'>", unsafe_allow_html=True)
 
     render_top_brand()
 
-    st.markdown("### Como você quer entrar hoje?")
+    st.markdown("### Acesso")
 
-    role = st.radio(
-        "Perfil",
-        ["Aluno", "Professor"],
-        horizontal=True,
-        key="welcome_role",
-    )
-
-    display_name = st.text_input(
-        "Como você quer ser chamado?",
+    username = st.text_input(
+        "Usuário",
         value=st.session_state.display_name,
-        key="welcome_display_name",
-        placeholder="Ex: Iago, Mesquita, Professor Iago...",
+        key="welcome_username",
+        placeholder="Ex: adenilson, orlando, francisco...",
     )
 
-    password_ok = True
-
-    if role == "Professor":
-        password = st.text_input(
-            "Senha do professor",
-            type="password",
-            key="welcome_prof_password",
-            placeholder="Digite a senha",
-        )
-        password_ok = password == PROFESSOR_PASSWORD
-
-        if password and not password_ok:
-            st.error("Senha de professor incorreta.")
+    password = st.text_input(
+        "Senha",
+        type="password",
+        key="welcome_password",
+        placeholder="Digite sua senha",
+    )
 
     st.markdown("---")
     st.markdown("### O que você está procurando hoje?")
@@ -207,25 +218,28 @@ def render_welcome_screen():
         "Descreva sua necessidade",
         value=st.session_state.welcome_search_text,
         key="welcome_search_text",
-        placeholder="Ex: Estou estudando função afim / Tenho dúvida em MRU / Preciso formatar em ABNT...",
+        placeholder="Ex: Gerar questões sobre MRU / Planejar aula sobre função afim / Formatar material em ABNT...",
     )
 
     suggested = suggest_area_from_text(search_text)
     if suggested:
         st.success(f"Sugestão automática: {suggested}")
 
-    if st.button("Continuar", use_container_width=True):
-        if not display_name.strip():
-            st.warning("Digite como você quer ser chamado.")
+    if st.button("Entrar", use_container_width=True):
+        if not username.strip():
+            st.warning("Digite seu usuário.")
             st.stop()
 
-        if role == "Professor" and not password_ok:
-            st.warning("Corrija a senha do professor para continuar.")
+        if not password.strip():
+            st.warning("Digite sua senha.")
             st.stop()
 
-        st.session_state.user_role = role
-        st.session_state.display_name = display_name.strip()
-        st.session_state.professor_authenticated = role == "Professor"
+        if not login_ok(username, password):
+            st.error("Usuário ou senha inválidos.")
+            st.stop()
+
+        st.session_state.logged = True
+        st.session_state.display_name = username.strip().lower()
         st.session_state.selected_area = suggested
         go_to_masters()
 
@@ -239,7 +253,7 @@ def render_masters_screen():
     st.markdown("<div style='max-width: 1120px; margin: 0 auto;'>", unsafe_allow_html=True)
 
     st.markdown(
-        f"### Beleza, **{st.session_state.display_name}**. Agora escolha seu mestre."
+        f"### Bem-vindo, **{st.session_state.display_name}**. Escolha seu mestre."
     )
 
     if st.session_state.selected_area:
@@ -249,7 +263,12 @@ def render_masters_screen():
 
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("Voltar", use_container_width=True):
+        if st.button("Sair", use_container_width=True):
+            st.session_state.logged = False
+            st.session_state.display_name = ""
+            st.session_state.selected_area = None
+            st.session_state.current_conversation_id = None
+            st.session_state.chat_history = []
             go_to_welcome()
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -266,9 +285,10 @@ def render_chat_screen():
         return
 
     area_info = MASTERS[area]
+    subject_key = get_user_subject_key(area)
 
     if st.session_state.current_conversation_id is None:
-        cid = get_active_conversation_id(area) or ensure_default_conversation(area)
+        cid = get_active_conversation_id(subject_key) or ensure_default_conversation(subject_key)
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
@@ -277,7 +297,6 @@ def render_chat_screen():
     with sidebar:
         st.markdown("### Bridge to the Future")
         st.caption(area_info.get("title", area))
-        st.caption(f"Perfil: {st.session_state.user_role}")
         st.caption(f"Usuário: {st.session_state.display_name}")
 
         c1, c2 = st.columns(2)
@@ -288,14 +307,14 @@ def render_chat_screen():
 
         with c2:
             if st.button("Nova", use_container_width=True):
-                new_id = create_new_conversation(area)
+                new_id = create_new_conversation(subject_key)
                 st.session_state.current_conversation_id = new_id
                 st.session_state.chat_history = []
                 st.rerun()
 
         st.markdown("### Histórico")
 
-        conversations = list_conversations_by_mentor(area)
+        conversations = list_conversations_by_mentor(subject_key)
         if not conversations:
             st.caption("Nenhuma conversa ainda.")
         else:
@@ -316,28 +335,27 @@ def render_chat_screen():
                 if st.button("Abrir", key=f"open_conv_{conv['id']}", use_container_width=True):
                     open_conversation(conv["id"])
 
-        if st.session_state.user_role == "Professor":
-            st.markdown("---")
+        st.markdown("---")
 
-            if st.button("Base docente", use_container_width=True):
-                st.session_state.show_materials_panel = not st.session_state.show_materials_panel
-                st.rerun()
+        if st.button("Base docente", use_container_width=True):
+            st.session_state.show_materials_panel = not st.session_state.show_materials_panel
+            st.rerun()
 
-            with st.expander("Materiais recentes", expanded=False):
-                rows = list_materials(limit=8, subject=area)
-                if rows:
-                    for row in rows:
-                        st.markdown(f"**{row['title']}**")
-                        st.caption(f"{row['subject']} • {row['teacher_name'] or 'Professor não informado'}")
-                else:
-                    st.caption("Nenhum material cadastrado.")
+        with st.expander("Materiais recentes", expanded=False):
+            rows = list_materials(limit=8, subject=area)
+            if rows:
+                for row in rows:
+                    st.markdown(f"**{row['title']}**")
+                    st.caption(f"{row['subject']} • {row['teacher_name'] or 'Professor não informado'}")
+            else:
+                st.caption("Nenhum material cadastrado.")
 
     with main:
         st.markdown(
             f"""
             <div class="chat-header-card">
                 <div class="chat-title">Bridge to the Future</div>
-                <div class="chat-sub">Projeto educacional para estudantes da rede pública.</div>
+                <div class="chat-sub">Projeto educacional para auxílio a docentes da rede pública.</div>
                 <div class="chat-mentor-box">
                     <div class="chat-mentor-title">{area_info.get("title", area)}</div>
                     <div class="small-muted">{area_info.get("description", "")}</div>
@@ -347,7 +365,7 @@ def render_chat_screen():
             unsafe_allow_html=True,
         )
 
-        if st.session_state.user_role == "Professor" and st.session_state.show_materials_panel:
+        if st.session_state.show_materials_panel:
             render_materials_admin(default_subject=area)
 
         if st.session_state.context_file_name:
@@ -382,7 +400,7 @@ def render_chat_screen():
             uploaded = st.file_uploader(
                 "Escolha PDF, imagem ou TXT",
                 type=["pdf", "png", "jpg", "jpeg", "webp", "txt"],
-                key=f"uploader_{area}",
+                key=f"uploader_{subject_key}",
                 label_visibility="collapsed",
             )
 
@@ -448,7 +466,7 @@ def render_chat_screen():
                     prompt = build_prompt(
                         user_input=user_input,
                         mentor=area,
-                        profile=st.session_state.user_role,
+                        profile="Professor",
                         history=st.session_state.chat_history[:-1],
                         context_text=st.session_state.context_text,
                         context_file_name=st.session_state.context_file_name,
@@ -483,9 +501,11 @@ def render_chat_screen():
 # =========================================================
 # RENDER
 # =========================================================
-if st.session_state.page == "welcome":
+if not st.session_state.logged:
     render_welcome_screen()
 elif st.session_state.page == "masters":
     render_masters_screen()
 elif st.session_state.page == "chat":
     render_chat_screen()
+else:
+    render_welcome_screen()
