@@ -5,7 +5,7 @@ def apply_theme():
     st.markdown(
         """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         :root {
             --bg: #171717;
@@ -27,6 +27,9 @@ def apply_theme():
             --radius-sm: 12px;
         }
 
+        /* =========================================
+           BASE
+        ========================================= */
         html, body, .stApp {
             background: var(--bg) !important;
             color: var(--text) !important;
@@ -45,14 +48,14 @@ def apply_theme():
         }
 
         html, body, [class*="css"] {
-            font-family: "Manrope", "Segoe UI", sans-serif;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
             color: var(--text);
         }
 
         h1, h2, h3, h4, h5, h6 {
             color: var(--text) !important;
             letter-spacing: -0.02em;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         p, div, span, label {
@@ -78,7 +81,24 @@ def apply_theme():
             border-right: 1px solid var(--border-soft);
         }
 
-        /* Inputs */
+        /* =========================================
+           IMPORTANTE: PRESERVA LATEX
+        ========================================= */
+        .katex, .katex * {
+            font-family: "KaTeX_Main", "Times New Roman", serif !important;
+        }
+
+        .MathJax, .MathJax * {
+            font-family: serif !important;
+        }
+
+        mjx-container, mjx-container * {
+            font-family: serif !important;
+        }
+
+        /* =========================================
+           INPUTS
+        ========================================= */
         .stTextInput input,
         .stTextArea textarea,
         .stNumberInput input,
@@ -90,7 +110,7 @@ def apply_theme():
             border: 1px solid var(--border) !important;
             border-radius: 14px !important;
             box-shadow: none !important;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         .stTextInput input:focus,
@@ -102,7 +122,9 @@ def apply_theme():
             outline: none !important;
         }
 
-        /* Buttons */
+        /* =========================================
+           BOTÕES
+        ========================================= */
         .stButton > button {
             background: linear-gradient(180deg, #343434, #2a2a2a) !important;
             color: var(--text) !important;
@@ -112,7 +134,7 @@ def apply_theme():
             border: 1px solid #424242 !important;
             transition: all 0.18s ease !important;
             box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         .stButton > button:hover {
@@ -130,7 +152,9 @@ def apply_theme():
             gap: 0.45rem;
         }
 
-        /* Shared panels */
+        /* =========================================
+           PAINÉIS
+        ========================================= */
         .sidebar-card,
         .history-card,
         .chat-header-card,
@@ -139,7 +163,7 @@ def apply_theme():
             background: var(--panel);
             border: 1px solid var(--border-soft);
             box-shadow: var(--shadow);
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         /* Sidebar */
@@ -162,7 +186,9 @@ def apply_theme():
             line-height: 1.45;
         }
 
-        /* Landing */
+        /* =========================================
+           LANDING
+        ========================================= */
         .landing-wrap {
             max-width: 1120px;
             margin: 0 auto;
@@ -240,7 +266,7 @@ def apply_theme():
             font-weight: 800;
             letter-spacing: 0.08em;
             font-size: 2rem;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         .landing-name {
@@ -257,14 +283,18 @@ def apply_theme():
             line-height: 1.55;
         }
 
-        /* Alerts */
+        /* =========================================
+           ALERTAS
+        ========================================= */
         [data-testid="stAlert"] {
             border-radius: 14px !important;
             border: 1px solid var(--border) !important;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
-        /* History */
+        /* =========================================
+           HISTÓRICO
+        ========================================= */
         .history-card {
             background: linear-gradient(180deg, #242424 0%, #1f1f1f 100%);
             border: 1px solid var(--border-soft);
@@ -291,7 +321,9 @@ def apply_theme():
             color: var(--muted-2);
         }
 
-        /* Chat header */
+        /* =========================================
+           CHAT HEADER
+        ========================================= */
         .chat-header-card {
             background: linear-gradient(180deg, #232323 0%, #1d1d1d 100%);
             border: 1px solid var(--border-soft);
@@ -331,7 +363,9 @@ def apply_theme():
             color: var(--text);
         }
 
-        /* Messages */
+        /* =========================================
+           MENSAGENS
+        ========================================= */
         .message-card,
         .message-user,
         .message-assistant,
@@ -339,10 +373,8 @@ def apply_theme():
         .chat-sub,
         .chat-mentor-title,
         .chat-mentor-box,
-        .context-chip,
-        [data-testid="stMarkdownContainer"],
-        [data-testid="stText"] {
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+        .context-chip {
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         .message-card {
@@ -372,7 +404,9 @@ def apply_theme():
             border-radius: 16px 16px 16px 6px;
         }
 
-        /* Context chip */
+        /* =========================================
+           CONTEXTO
+        ========================================= */
         .context-chip {
             background: #232323;
             border: 1px solid var(--border-soft);
@@ -383,30 +417,38 @@ def apply_theme():
             box-shadow: 0 8px 18px rgba(0,0,0,0.16);
         }
 
-        /* Expander */
+        /* =========================================
+           EXPANDER
+        ========================================= */
         .streamlit-expanderHeader {
             background: var(--panel) !important;
             border-radius: 12px !important;
             color: var(--text) !important;
             border: 1px solid var(--border-soft) !important;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
-        /* Upload */
+        /* =========================================
+           UPLOAD
+        ========================================= */
         [data-testid="stFileUploader"] {
             background: var(--panel);
             border: 1px dashed rgba(255,255,255,0.10);
             border-radius: 16px;
             padding: 10px;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
-        /* Images */
+        /* =========================================
+           IMAGENS
+        ========================================= */
         [data-testid="stImage"] img {
             border-radius: 18px;
         }
 
-        /* Chat input */
+        /* =========================================
+           CHAT INPUT
+        ========================================= */
         [data-testid="stChatInput"] {
             border: none !important;
             box-shadow: none !important;
@@ -426,7 +468,7 @@ def apply_theme():
             border-radius: 18px !important;
             color: var(--text) !important;
             box-shadow: none !important;
-            font-family: "Manrope", "Segoe UI", sans-serif !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
         [data-testid="stChatInput"] textarea:focus,
@@ -436,6 +478,9 @@ def apply_theme():
             outline: none !important;
         }
 
+        /* =========================================
+           LINKS E LINHAS
+        ========================================= */
         a {
             color: #d4d4d8 !important;
         }
@@ -444,7 +489,9 @@ def apply_theme():
             border-color: var(--border) !important;
         }
 
-        /* Remove Streamlit UI */
+        /* =========================================
+           REMOVE STREAMLIT UI
+        ========================================= */
         #MainMenu {
             display: none !important;
         }
