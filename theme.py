@@ -90,6 +90,7 @@ def apply_theme():
             border: 1px solid var(--border) !important;
             border-radius: 14px !important;
             box-shadow: none !important;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         .stTextInput input:focus,
@@ -138,6 +139,7 @@ def apply_theme():
             background: var(--panel);
             border: 1px solid var(--border-soft);
             box-shadow: var(--shadow);
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         /* Sidebar */
@@ -238,6 +240,7 @@ def apply_theme():
             font-weight: 800;
             letter-spacing: 0.08em;
             font-size: 2rem;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         .landing-name {
@@ -258,6 +261,7 @@ def apply_theme():
         [data-testid="stAlert"] {
             border-radius: 14px !important;
             border: 1px solid var(--border) !important;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         /* History */
@@ -328,6 +332,19 @@ def apply_theme():
         }
 
         /* Messages */
+        .message-card,
+        .message-user,
+        .message-assistant,
+        .chat-title,
+        .chat-sub,
+        .chat-mentor-title,
+        .chat-mentor-box,
+        .context-chip,
+        [data-testid="stMarkdownContainer"],
+        [data-testid="stText"] {
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
+        }
+
         .message-card {
             padding: 14px 18px;
             border-radius: 16px;
@@ -372,6 +389,7 @@ def apply_theme():
             border-radius: 12px !important;
             color: var(--text) !important;
             border: 1px solid var(--border-soft) !important;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         /* Upload */
@@ -380,6 +398,7 @@ def apply_theme():
             border: 1px dashed rgba(255,255,255,0.10);
             border-radius: 16px;
             padding: 10px;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         /* Images */
@@ -407,6 +426,7 @@ def apply_theme():
             border-radius: 18px !important;
             color: var(--text) !important;
             box-shadow: none !important;
+            font-family: "Manrope", "Segoe UI", sans-serif !important;
         }
 
         [data-testid="stChatInput"] textarea:focus,
