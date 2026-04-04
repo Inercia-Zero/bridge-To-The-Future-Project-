@@ -279,9 +279,6 @@ def render_chat_screen():
     sidebar, main = st.columns([1.15, 4.2], gap="medium")
 
     with sidebar:
-        if os.path.exists("logoifce.png"):
-            st.image("logoifce.png", width=110)
-
         st.markdown("### Bridge to the Future")
         st.caption(area_info.get("title", area))
         st.caption(f"Perfil: {st.session_state.user_role}")
@@ -346,7 +343,7 @@ def render_chat_screen():
                     st.caption("Nenhum material cadastrado.")
 
     with main:
-        top_left, top_right = st.columns([4.2, 1.2], gap="medium")
+        top_left = st.container()
 
         with top_left:
             st.markdown(
@@ -381,10 +378,6 @@ def render_chat_screen():
                 """,
                 unsafe_allow_html=True,
             )
-
-        with top_right:
-            if os.path.exists("logoprojeto.png"):
-                st.image("logoprojeto.png", use_container_width=True)
 
         if st.session_state.user_role == "Professor" and st.session_state.show_materials_panel:
             render_materials_admin(default_subject=area)
