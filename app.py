@@ -1,10 +1,9 @@
-import os
 import random
 import streamlit as st
 
 from theme import apply_theme
 from prompts import build_prompt, is_smalltalk
-from masters import MASTERS 
+from masters import MASTERS
 from groq_client import ask_ai, ask_vision_ai
 from db_core import (
     init_db,
@@ -20,7 +19,10 @@ from db_core import (
 from attachments import validate_upload, save_upload, extract_pdf_text
 from graph_tools import maybe_generate_graph
 from geometry_tools import maybe_generate_geometry_visual
-from ui_components import render_message
+from ui_components import (
+    render_message,
+    render_landing_screen,
+)
 from materials import render_materials_admin
 
 
@@ -51,6 +53,7 @@ DEFAULTS = {
     "professor_password_input": "",
     "professor_authenticated": False,
     "selected_area": None,
+    "welcome_search_text": "",
     "current_conversation_id": None,
     "chat_history": [],
     "show_attach_panel": False,
@@ -116,19 +119,39 @@ def open_conversation(conversation_id: int):
 
 
 def suggest_area_from_text(user_text: str):
-    t = (user_text or "").lower()
+    t = (user_text or "").strip().lower()
 
-    if any(k in t for k in ["matemática", "matematica", "equação", "equacao", "função", "funcao", "bhaskara", "álgebra", "algebra", "geometria"]):
+    if not t:
+        return None
+
+    if any(k in t for k in [
+        "matemática", "matematica", "equação", "equacao", "função", "funcao",
+        "bhaskara", "báscara", "álgebra", "algebra", "geometria",
+        "trigonometria", "derivada", "integral", "logaritmo"
+    ]):
         return "Matemática"
-    if any(k in t for k in ["física", "fisica", "mru", "mruv", "força", "forca", "energia", "movimento"]):
+
+    if any(k in t for k in [
+        "física", "fisica", "mru", "mruv", "força", "forca",
+        "energia", "movimento", "velocidade", "aceleração", "aceleracao",
+        "gravidade", "newton"
+    ]):
         return "Física"
-    if any(k in t for k in [ "metodologia", "pesquisa", "artigo", "projeto científico",
-    "projeto cientifico", "projeto", "projeto pessoal",
-    "hipótese", "hipotese", "tema", "objetivo",
-    "justificativa", "problema de pesquisa",
-    "referencial", "iniciacao cientifica", "iniciação científica"]):
+
+    if any(k in t for k in [
+        "metodologia", "pesquisa", "artigo", "projeto científico",
+        "projeto cientifico", "projeto", "projeto pessoal",
+        "hipótese", "hipotese", "tema", "objetivo",
+        "justificativa", "problema de pesquisa",
+        "referencial", "iniciacao cientifica", "iniciação científica"
+    ]):
         return "Metodologia Científica"
-    if any(k in t for k in ["abnt", "relatório", "relatorio", "currículo", "curriculo", "resumo", "documento"]):
+
+    if any(k in t for k in [
+        "abnt", "relatório", "relatorio", "currículo", "curriculo",
+        "resumo", "documento", "trabalho", "citação", "citacao",
+        "referência", "referencia", "tcc"
+    ]):
         return "Documentos Acadêmicos"
 
     return None
@@ -140,6 +163,7 @@ def suggest_area_from_text(user_text: str):
 def render_top_brand():
     st.markdown("## Bridge to the Future")
     st.caption("Projeto educacional para estudantes da rede pública.")
+
 
 # =========================================================
 # TELA 1 - ENTRADA
@@ -184,6 +208,7 @@ def render_welcome_screen():
 
     search_text = st.text_input(
         "Descreva sua necessidade",
+        value=st.session_state.welcome_search_text,
         key="welcome_search_text",
         placeholder="Ex: Estou estudando função afim / Tenho dúvida em MRU / Preciso formatar em ABNT...",
     )
@@ -204,9 +229,7 @@ def render_welcome_screen():
         st.session_state.user_role = role
         st.session_state.display_name = display_name.strip()
         st.session_state.professor_authenticated = role == "Professor"
-
-        if suggested:
-            st.session_state.selected_area = suggested
+        st.session_state.selected_area = suggested
 
         go_to_masters()
 
@@ -217,7 +240,7 @@ def render_welcome_screen():
 # TELA 2 - ESCOLHA DOS MESTRES
 # =========================================================
 def render_masters_screen():
-    st.markdown("<div style='max-width: 1050px; margin: 0 auto;'>", unsafe_allow_html=True)
+    st.markdown("<div style='max-width: 1120px; margin: 0 auto;'>", unsafe_allow_html=True)
 
     render_top_brand()
 
@@ -228,37 +251,7 @@ def render_masters_screen():
     if st.session_state.selected_area:
         st.info(f"Sugestão com base no que você escreveu: {st.session_state.selected_area}")
 
-    areas = list(MASTERS.keys())
-    cols = st.columns(2)
-
-    for i, area in enumerate(areas):
-        data = MASTERS[area]
-        highlight = area == st.session_state.selected_area
-
-        with cols[i % 2]:
-            st.markdown(
-                f"""
-                <div style="
-                    background: {'rgba(166,124,82,0.14)' if highlight else 'rgba(255,255,255,0.72)'};
-                    border: 1px solid rgba(120,90,60,0.14);
-                    border-radius: 18px;
-                    padding: 18px;
-                    min-height: 170px;
-                    margin-bottom: 14px;
-                ">
-                    <div style="font-size: 1.12rem; font-weight: 800; margin-bottom: 6px;">
-                        {data.get("emoji", "")} {data.get("title", area)}
-                    </div>
-                    <div style="opacity: 0.85; line-height: 1.45;">
-                        {data.get("description", "")}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            if st.button(f"Entrar em {area}", key=f"enter_area_{area}", use_container_width=True):
-                open_area(area)
+    render_landing_screen(MASTERS, open_area)
 
     c1, c2 = st.columns(2)
     with c1:
@@ -273,6 +266,11 @@ def render_masters_screen():
 # =========================================================
 def render_chat_screen():
     area = st.session_state.selected_area
+
+    if not area:
+        go_to_masters()
+        return
+
     area_info = MASTERS[area]
 
     if st.session_state.current_conversation_id is None:
@@ -289,9 +287,11 @@ def render_chat_screen():
         st.caption(f"Usuário: {st.session_state.display_name}")
 
         c1, c2 = st.columns(2)
+
         with c1:
             if st.button("Mestres", use_container_width=True):
                 go_to_masters()
+
         with c2:
             if st.button("Nova", use_container_width=True):
                 new_id = create_new_conversation(area)
@@ -333,6 +333,7 @@ def render_chat_screen():
 
         if st.session_state.user_role == "Professor":
             st.markdown("---")
+
             if st.button("Base docente", use_container_width=True):
                 st.session_state.show_materials_panel = not st.session_state.show_materials_panel
                 st.rerun()
@@ -347,41 +348,38 @@ def render_chat_screen():
                     st.caption("Nenhum material cadastrado.")
 
     with main:
-        top_left = st.container()
-
-        with top_left:
-            st.markdown(
-                f"""
+        st.markdown(
+            f"""
+            <div style="
+                background: linear-gradient(135deg, rgba(255,250,243,0.95) 0%, rgba(243,229,214,0.92) 100%);
+                border: 1px solid rgba(120,90,60,0.14);
+                border-radius: 22px;
+                padding: 22px;
+                margin-bottom: 14px;
+            ">
+                <div style="font-size: 2rem; font-weight: 900; margin-bottom: 6px;">
+                    Bridge to the Future
+                </div>
+                <div style="opacity: 0.82; margin-bottom: 14px;">
+                    Projeto educacional para estudantes da rede pública.
+                </div>
                 <div style="
-                    background: linear-gradient(135deg, rgba(255,250,243,0.95) 0%, rgba(243,229,214,0.92) 100%);
-                    border: 1px solid rgba(120,90,60,0.14);
-                    border-radius: 22px;
-                    padding: 22px;
-                    margin-bottom: 14px;
+                    background: rgba(255,255,255,0.72);
+                    border: 1px solid rgba(120,90,60,0.12);
+                    border-radius: 16px;
+                    padding: 14px;
                 ">
-                    <div style="font-size: 2rem; font-weight: 900; margin-bottom: 6px;">
-                        Bridge to the Future
+                    <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;">
+                        {area_info.get("title", area)}
                     </div>
-                    <div style="opacity: 0.82; margin-bottom: 14px;">
-                        Projeto educacional para estudantes da rede pública.
-                    </div>
-                    <div style="
-                        background: rgba(255,255,255,0.72);
-                        border: 1px solid rgba(120,90,60,0.12);
-                        border-radius: 16px;
-                        padding: 14px;
-                    ">
-                        <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 4px;">
-                            {area_info.get("title", area)}
-                        </div>
-                        <div style="opacity: 0.84;">
-                            {area_info.get("description", "")}
-                        </div>
+                    <div style="opacity: 0.84;">
+                        {area_info.get("description", "")}
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         if st.session_state.user_role == "Professor" and st.session_state.show_materials_panel:
             render_materials_admin(default_subject=area)
@@ -427,6 +425,7 @@ def render_chat_screen():
                 key=f"uploader_{area}",
                 label_visibility="collapsed",
             )
+
             if uploaded is not None:
                 error = validate_upload(uploaded)
                 if error:
