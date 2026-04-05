@@ -587,4 +587,4 @@ def render_chat_screen():
     with st.sidebar:
         st.markdown("## Bridge to the Future")
         st.caption(area_info.get("title", area))
-        st.caption(f"Professor: {owner_pretty}")
+        st.caption(f"Professor {owner_pretty}")
