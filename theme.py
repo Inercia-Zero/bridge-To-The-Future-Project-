@@ -43,8 +43,8 @@ def apply_theme():
 
         .block-container {
             max-width: 1280px;
-            padding-top: 0.55rem !important;
-            padding-bottom: 1.25rem !important;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
         }
 
         html, body, [class*="css"] {
@@ -82,7 +82,7 @@ def apply_theme():
         }
 
         /* =========================================
-           LATEX
+           IMPORTANTE: PRESERVA LATEX
         ========================================= */
         .katex, .katex * {
             font-family: "KaTeX_Main", "Times New Roman", serif !important;
@@ -157,6 +157,7 @@ def apply_theme():
         ========================================= */
         .sidebar-card,
         .history-card,
+        .chat-header-card,
         .context-chip,
         .landing-card {
             background: var(--panel);
@@ -165,6 +166,7 @@ def apply_theme():
             font-family: "Inter", "Segoe UI", sans-serif !important;
         }
 
+        /* Sidebar */
         .sidebar-card {
             border-radius: var(--radius-lg);
             padding: 14px;
@@ -320,27 +322,86 @@ def apply_theme():
         }
 
         /* =========================================
-           TOPO LIMPO DO CHAT
+           CHAT HEADER
         ========================================= */
-        .chat-topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            padding: 6px 2px 2px 2px;
+        .chat-header-card {
+            background: linear-gradient(180deg, #232323 0%, #1d1d1d 100%);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-xl);
+            padding: 22px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
         }
 
-        .chat-topbar-title {
-            font-size: 1.02rem;
-            font-weight: 800;
+        .chat-title {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.08;
             color: var(--text);
-            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+            letter-spacing: -0.03em;
         }
 
-        .chat-topbar-meta {
-            font-size: 0.84rem;
+        .chat-sub {
             color: var(--muted);
+            font-size: 0.98rem;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .chat-mentor-box {
+            background: #282828;
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .chat-mentor-title {
+            font-size: 1.06rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        /* =========================================
+           MENSAGENS
+        ========================================= */
+        .message-card,
+        .message-user,
+        .message-assistant,
+        .chat-title,
+        .chat-sub,
+        .chat-mentor-title,
+        .chat-mentor-box,
+        .context-chip {
+            font-family: "Inter", "Segoe UI", sans-serif !important;
+        }
+
+        .message-card {
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            max-width: 74%;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+            line-height: 1.7;
+            font-size: 0.98rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message-user {
+            background: #303030 !important;
+            color: var(--text) !important;
+            margin-left: auto;
+            border-radius: 16px 16px 6px 16px;
+        }
+
+        .message-assistant {
+            background: #1f1f1f !important;
+            color: var(--text) !important;
+            margin-right: auto;
+            border-radius: 16px 16px 16px 6px;
         }
 
         /* =========================================
@@ -404,12 +465,10 @@ def apply_theme():
         [data-testid="stChatInput"] input {
             background: #222222 !important;
             border: 1px solid #333333 !important;
-            border-radius: 20px !important;
+            border-radius: 18px !important;
             color: var(--text) !important;
             box-shadow: none !important;
             font-family: "Inter", "Segoe UI", sans-serif !important;
-            padding-top: 0.8rem !important;
-            padding-bottom: 0.8rem !important;
         }
 
         [data-testid="stChatInput"] textarea:focus,
@@ -417,88 +476,6 @@ def apply_theme():
             border: 1px solid #4a4a4a !important;
             box-shadow: none !important;
             outline: none !important;
-        }
-
-        /* =========================================
-           CHAT NATIVO DO STREAMLIT
-        ========================================= */
-        [data-testid="stChatMessage"] {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding-top: 0.15rem !important;
-            padding-bottom: 0.15rem !important;
-        }
-
-        [data-testid="stChatMessage"] > div {
-            background: transparent !important;
-        }
-
-        [data-testid="stChatMessageAvatar"] {
-            display: none !important;
-        }
-
-        [data-testid="stChatMessageContent"] {
-            margin-left: 0 !important;
-            padding-left: 0 !important;
-            background: transparent !important;
-        }
-
-        [data-testid="stChatMessageContent"] p,
-        [data-testid="stChatMessageContent"] div,
-        [data-testid="stChatMessageContent"] span,
-        [data-testid="stChatMessageContent"] li {
-            color: var(--text) !important;
-            font-family: "Inter", "Segoe UI", sans-serif !important;
-        }
-
-        [data-testid="stChatMessageContent"] code {
-            background: #2a2a2a !important;
-            color: #f5f5f5 !important;
-            border-radius: 8px !important;
-            padding: 0.15rem 0.35rem !important;
-        }
-
-        [data-testid="stChatMessageContent"] [data-testid="stMarkdownContainer"] {
-            background: transparent !important;
-            color: var(--text) !important;
-        }
-
-        [data-testid="stChatMessageContent"] [data-testid="stImage"] {
-            margin-top: 0.5rem !important;
-        }
-
-        [data-testid="stChatMessageContainer"] {
-            background: transparent !important;
-            border: none !important;
-        }
-
-        [data-testid="stVerticalBlock"] [data-testid="stChatMessage"] {
-            background: transparent !important;
-        }
-
-        [data-testid="stChatMessageContent"] > div {
-            background: #1f1f1f !important;
-            border: 1px solid var(--border-soft) !important;
-            border-radius: 16px !important;
-            padding: 14px 18px !important;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.16) !important;
-        }
-
-        /* =========================================
-           LARGURA DO CONTEÚDO DO CHAT
-        ========================================= */
-        .chat-main-wrap {
-            max-width: 860px;
-            margin: 0 auto;
-        }
-
-        /* =========================================
-           BOTÃO PLUS
-        ========================================= */
-        .stButton > button[kind="secondary"],
-        .plus-button button {
-            min-height: 42px !important;
         }
 
         /* =========================================
@@ -545,42 +522,6 @@ def apply_theme():
 
         div[data-testid="stToolbar"] {
             display: none !important;
-        }
-
-        /* =========================================
-           MOBILE
-        ========================================= */
-        @media (max-width: 768px) {
-            .block-container {
-                padding-top: 0.35rem !important;
-                padding-left: 0.7rem !important;
-                padding-right: 0.7rem !important;
-                padding-bottom: 1rem !important;
-            }
-
-            .chat-main-wrap {
-                max-width: 100%;
-            }
-
-            .chat-topbar {
-                margin-bottom: 8px;
-            }
-
-            .chat-topbar-title {
-                font-size: 0.98rem;
-            }
-
-            .chat-topbar-meta {
-                font-size: 0.78rem;
-            }
-
-            .history-card {
-                padding: 10px;
-            }
-
-            .landing-title {
-                font-size: 1.75rem;
-            }
         }
         </style>
         """,
