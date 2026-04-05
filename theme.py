@@ -4,40 +4,45 @@ import streamlit as st
 def apply_theme():
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
     :root {
         --bg: #141414;
-        --bg-2: #1a1a1a;
+        --bg-soft: #181818;
         --sidebar: #171717;
-        --panel: #212121;
-        --panel-hover: #2a2a2a;
-        --panel-soft: #1e1e1e;
+        --panel: #1f1f1f;
+        --panel-2: #232323;
+        --panel-3: #2a2a2a;
         --border: rgba(255, 255, 255, 0.08);
         --border-strong: rgba(255, 255, 255, 0.14);
         --text: #ececec;
-        --muted: #a6a6a6;
-        --muted-2: #8f8f8f;
+        --muted: #a8a8a8;
+        --muted-2: #8b8b8b;
         --shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+        --radius-lg: 22px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
     }
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    html, body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+            Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
     }
 
-    .stApp {
+    .stApp, [data-testid="stAppViewContainer"] {
         background:
-            radial-gradient(circle at top center, rgba(255, 255, 255, 0.03), transparent 26%),
-            linear-gradient(180deg, var(--bg) 0%, #121212 100%);
+            radial-gradient(circle at top center, rgba(255,255,255,0.025), transparent 22%),
+            linear-gradient(180deg, #141414 0%, #121212 100%);
         color: var(--text);
     }
 
     .block-container {
-        padding-top: 1.6rem;
         max-width: 1280px;
+        padding-top: 1.4rem;
+        padding-bottom: 1rem;
     }
 
-    /* Streamlit chrome */
+    /* esconder chrome do Streamlit */
     #MainMenu,
     header[data-testid="stHeader"],
     footer,
@@ -49,7 +54,7 @@ def apply_theme():
         position: fixed !important;
     }
 
-    /* Sidebar */
+    /* sidebar */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #171717 0%, #141414 100%);
         border-right: 1px solid var(--border);
@@ -59,13 +64,7 @@ def apply_theme():
         color: var(--text) !important;
     }
 
-    [data-testid="stSidebar"] .stMarkdown h1,
-    [data-testid="stSidebar"] .stMarkdown h2,
-    [data-testid="stSidebar"] .stMarkdown h3 {
-        letter-spacing: -0.03em;
-    }
-
-    /* General text */
+    /* texto geral */
     .stMarkdown, .stText, .stCaption, .stAlert,
     label, p, li, span, small, h1, h2, h3, h4, h5, h6 {
         color: var(--text);
@@ -76,11 +75,15 @@ def apply_theme():
     }
 
     a {
-        color: #c9d7ff !important;
+        color: #d7d7d7 !important;
         text-decoration: none;
     }
 
-    /* Main wrappers */
+    hr {
+        border-color: var(--border);
+    }
+
+    /* wrappers principais */
     .chat-main-wrap {
         max-width: 980px;
         margin: 0 auto;
@@ -88,11 +91,11 @@ def apply_theme():
     }
 
     .chat-topbar {
-        background: linear-gradient(180deg, #202020 0%, #1c1c1c 100%);
+        background: linear-gradient(180deg, #202020 0%, #1b1b1b 100%);
         border: 1px solid var(--border);
-        border-radius: 22px;
-        padding: 1.2rem 1.35rem;
-        margin-bottom: 1.05rem;
+        border-radius: var(--radius-lg);
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1.15rem;
         box-shadow: var(--shadow);
     }
 
@@ -100,52 +103,52 @@ def apply_theme():
         font-size: 1.72rem;
         font-weight: 800;
         letter-spacing: -0.04em;
-        color: #f3f3f3;
-        line-height: 1.1;
+        color: #f4f4f4;
+        line-height: 1.08;
     }
 
     .chat-topbar-meta {
         margin-top: 0.42rem;
-        color: #b8b8b8;
+        color: #b7b7b7;
         font-size: 1rem;
         font-weight: 500;
     }
 
     .context-chip {
-        background: #1d1d1d;
+        background: linear-gradient(180deg, #1e1e1e 0%, #191919 100%);
         border: 1px solid var(--border);
         color: var(--text);
-        border-radius: 16px;
+        border-radius: var(--radius-md);
         padding: 0.82rem 1rem;
         margin-bottom: 0.85rem;
     }
 
-    /* History */
+    /* histórico */
     .history-card {
-        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%);
+        background: linear-gradient(180deg, #252525 0%, #202020 100%);
         border: 1px solid var(--border);
         border-radius: 18px;
         padding: 0.95rem 1rem;
         margin-bottom: 0.55rem;
         transition: 0.18s ease;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.14);
     }
 
     .history-card:hover {
-        background: linear-gradient(180deg, #292929 0%, #232323 100%);
+        background: linear-gradient(180deg, #2b2b2b 0%, #232323 100%);
         border-color: var(--border-strong);
         transform: translateY(-1px);
     }
 
     .history-card.active {
-        background: linear-gradient(180deg, #2a2a2a 0%, #242424 100%);
-        border-color: rgba(255, 255, 255, 0.16);
+        background: linear-gradient(180deg, #2d2d2d 0%, #252525 100%);
+        border-color: rgba(255,255,255,0.16);
     }
 
     .history-title {
         font-weight: 700;
         font-size: 1rem;
-        color: #f0f0f0;
+        color: #f1f1f1;
         letter-spacing: -0.02em;
     }
 
@@ -155,7 +158,7 @@ def apply_theme():
         margin-top: 0.24rem;
     }
 
-    /* Inputs */
+    /* inputs */
     .stTextInput input,
     .stTextArea textarea,
     .stSelectbox div[data-baseweb="select"] > div,
@@ -174,11 +177,11 @@ def apply_theme():
 
     .stTextInput input:focus,
     .stTextArea textarea:focus {
-        border-color: rgba(255, 255, 255, 0.16) !important;
+        border-color: rgba(255,255,255,0.16) !important;
         box-shadow: none !important;
     }
 
-    /* Buttons */
+    /* botões */
     .stButton > button,
     .stDownloadButton > button {
         background: linear-gradient(180deg, #2a2a2a 0%, #242424 100%);
@@ -188,17 +191,16 @@ def apply_theme():
         min-height: 3rem;
         font-weight: 600;
         transition: 0.18s ease;
-        box-shadow: none;
     }
 
     .stButton > button:hover,
     .stDownloadButton > button:hover {
-        background: linear-gradient(180deg, #313131 0%, #2b2b2b 100%);
+        background: linear-gradient(180deg, #313131 0%, #2a2a2a 100%);
         border-color: var(--border-strong);
         color: #ffffff;
     }
 
-    /* Expanders / alerts */
+    /* expander / alerts */
     div[data-testid="stExpander"] {
         background: #1d1d1d;
         border: 1px solid var(--border);
@@ -207,28 +209,41 @@ def apply_theme():
 
     .stInfo, .stSuccess, .stWarning, .stError {
         border-radius: 16px;
-        background: #1e1e1e;
+        background: #1d1d1d;
         border: 1px solid var(--border);
     }
 
     section[data-testid="stFileUploaderDropzone"] {
-        background: #1d1d1d;
-        border: 1px dashed rgba(255, 255, 255, 0.14);
+        background: #1c1c1c;
+        border: 1px dashed rgba(255,255,255,0.12);
         border-radius: 18px;
     }
 
-    /* Chat area */
+    /* chat geral */
     [data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.55rem;
     }
 
+    [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    /* caixas de texto dentro do chat, mais suaves */
+    [data-testid="stChatMessage"] p,
+    [data-testid="stChatMessage"] li {
+        color: #ececec !important;
+    }
+
+    /* input do chat */
     [data-testid="stChatInput"] {
         background: transparent;
+        margin-top: 0.8rem;
     }
 
     [data-testid="stChatInput"] > div {
@@ -245,20 +260,49 @@ def apply_theme():
         box-shadow: none !important;
         border-radius: 18px !important;
         font-size: 1rem !important;
+        line-height: 1.45 !important;
     }
 
     [data-testid="stChatInput"] button {
         border-radius: 16px !important;
+        background: #2e2e2e !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
     }
 
-    /* Divider */
-    hr {
-        border-color: var(--border);
+    [data-testid="stChatInput"] button:hover {
+        background: #383838 !important;
     }
 
-    /* Keep LaTeX safe */
+    /* blocos markdown comuns */
+    .stMarkdown pre {
+        background: #1b1b1b !important;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .stMarkdown code {
+        color: #efefef;
+    }
+
+    /* LaTeX preservado */
+    .katex-display {
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0.35rem 0;
+    }
+
     .katex, .katex * {
-        font-family: KaTeX_Main, Times New Roman, serif !important;
+        font-family: KaTeX_Main, "Times New Roman", serif !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-transform: none !important;
+    }
+
+    mjx-container, mjx-container * {
+        font-family: inherit !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+        text-transform: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
