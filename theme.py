@@ -7,18 +7,18 @@ def apply_theme():
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --bg: #0a0a0a;
-        --bg-soft: #0f1115;
-        --panel: #111317;
-        --panel-2: #171a21;
-        --panel-3: #1d2230;
+        --bg: #141414;
+        --bg-2: #1a1a1a;
+        --sidebar: #171717;
+        --panel: #212121;
+        --panel-hover: #2a2a2a;
+        --panel-soft: #1e1e1e;
         --border: rgba(255, 255, 255, 0.08);
         --border-strong: rgba(255, 255, 255, 0.14);
-        --text: #f3f4f6;
-        --muted: #a7afbf;
-        --accent: #8ab4f8;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.38);
-        --glow: radial-gradient(circle at top left, rgba(66, 133, 244, 0.10), transparent 34%);
+        --text: #ececec;
+        --muted: #a6a6a6;
+        --muted-2: #8f8f8f;
+        --shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
     }
 
     html, body, [class*="css"] {
@@ -27,31 +27,31 @@ def apply_theme():
 
     .stApp {
         background:
-            var(--glow),
-            linear-gradient(180deg, #090909 0%, #0b0d12 52%, #090909 100%);
+            radial-gradient(circle at top center, rgba(255, 255, 255, 0.03), transparent 26%),
+            linear-gradient(180deg, var(--bg) 0%, #121212 100%);
         color: var(--text);
     }
 
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1.6rem;
+        max-width: 1280px;
     }
 
-    /* esconde elementos do Streamlit */
+    /* Streamlit chrome */
     #MainMenu,
     header[data-testid="stHeader"],
     footer,
     div[data-testid="stToolbar"],
-    div[data-testid="stDecoration"] {
+    div[data-testid="stDecoration"],
+    [data-testid="stStatusWidget"] {
         visibility: hidden !important;
         height: 0 !important;
         position: fixed !important;
     }
 
-    /* sidebar */
+    /* Sidebar */
     [data-testid="stSidebar"] {
-        background:
-            radial-gradient(circle at top left, rgba(66, 133, 244, 0.10), transparent 28%),
-            linear-gradient(180deg, #0d1016 0%, #0a0c11 100%);
+        background: linear-gradient(180deg, #171717 0%, #141414 100%);
         border-right: 1px solid var(--border);
     }
 
@@ -59,95 +59,13 @@ def apply_theme():
         color: var(--text) !important;
     }
 
-    /* wrappers */
-    .chat-main-wrap {
-        max-width: 980px;
-        margin: 0 auto;
-        padding-bottom: 1rem;
-    }
-
-    .chat-topbar {
-        background:
-            linear-gradient(135deg, rgba(25, 30, 42, 0.94), rgba(17, 20, 28, 0.94));
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        padding: 1.35rem 1.4rem;
-        margin-bottom: 1.15rem;
-        box-shadow: var(--shadow);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .chat-topbar::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at top left, rgba(138, 180, 248, 0.10), transparent 34%);
-        pointer-events: none;
-    }
-
-    .chat-topbar-title {
-        position: relative;
-        font-size: 1.95rem;
-        font-weight: 800;
+    [data-testid="stSidebar"] .stMarkdown h1,
+    [data-testid="stSidebar"] .stMarkdown h2,
+    [data-testid="stSidebar"] .stMarkdown h3 {
         letter-spacing: -0.03em;
-        color: #f8fafc;
-        margin-bottom: 0.2rem;
     }
 
-    .chat-topbar-meta {
-        position: relative;
-        color: #b7c0d1;
-        font-size: 1.02rem;
-        font-weight: 500;
-    }
-
-    .context-chip {
-        background: rgba(20, 24, 31, 0.94);
-        border: 1px solid var(--border);
-        color: var(--text);
-        border-radius: 16px;
-        padding: 0.86rem 1rem;
-        margin-bottom: 0.85rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
-    }
-
-    /* histórico */
-    .history-card {
-        background: linear-gradient(135deg, rgba(25, 30, 42, 0.94), rgba(18, 22, 31, 0.94));
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        padding: 1rem 1rem;
-        margin-bottom: 0.6rem;
-        transition: 0.2s ease;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }
-
-    .history-card:hover {
-        border-color: var(--border-strong);
-        transform: translateY(-1px);
-    }
-
-    .history-card.active {
-        background: linear-gradient(135deg, rgba(31, 38, 53, 0.96), rgba(21, 26, 36, 0.96));
-        border-color: rgba(138, 180, 248, 0.32);
-        box-shadow: 0 0 0 1px rgba(138, 180, 248, 0.12), 0 14px 30px rgba(0, 0, 0, 0.22);
-    }
-
-    .history-title {
-        font-weight: 700;
-        font-size: 0.99rem;
-        color: #f5f7fb;
-        letter-spacing: -0.02em;
-    }
-
-    .history-meta {
-        color: var(--muted);
-        font-size: 0.83rem;
-        margin-top: 0.22rem;
-    }
-
-    /* textos gerais */
+    /* General text */
     .stMarkdown, .stText, .stCaption, .stAlert,
     label, p, li, span, small, h1, h2, h3, h4, h5, h6 {
         color: var(--text);
@@ -157,77 +75,156 @@ def apply_theme():
         color: var(--muted) !important;
     }
 
-    /* inputs */
+    a {
+        color: #c9d7ff !important;
+        text-decoration: none;
+    }
+
+    /* Main wrappers */
+    .chat-main-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding-bottom: 1rem;
+    }
+
+    .chat-topbar {
+        background: linear-gradient(180deg, #202020 0%, #1c1c1c 100%);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 1.2rem 1.35rem;
+        margin-bottom: 1.05rem;
+        box-shadow: var(--shadow);
+    }
+
+    .chat-topbar-title {
+        font-size: 1.72rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: #f3f3f3;
+        line-height: 1.1;
+    }
+
+    .chat-topbar-meta {
+        margin-top: 0.42rem;
+        color: #b8b8b8;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .context-chip {
+        background: #1d1d1d;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 16px;
+        padding: 0.82rem 1rem;
+        margin-bottom: 0.85rem;
+    }
+
+    /* History */
+    .history-card {
+        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 0.95rem 1rem;
+        margin-bottom: 0.55rem;
+        transition: 0.18s ease;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+    }
+
+    .history-card:hover {
+        background: linear-gradient(180deg, #292929 0%, #232323 100%);
+        border-color: var(--border-strong);
+        transform: translateY(-1px);
+    }
+
+    .history-card.active {
+        background: linear-gradient(180deg, #2a2a2a 0%, #242424 100%);
+        border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .history-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #f0f0f0;
+        letter-spacing: -0.02em;
+    }
+
+    .history-meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-top: 0.24rem;
+    }
+
+    /* Inputs */
     .stTextInput input,
     .stTextArea textarea,
     .stSelectbox div[data-baseweb="select"] > div,
     .stMultiSelect div[data-baseweb="select"] > div,
     [data-baseweb="input"] {
-        background: rgba(28, 31, 39, 0.96) !important;
+        background: #1f1f1f !important;
         color: var(--text) !important;
         border: 1px solid var(--border) !important;
-        border-radius: 16px !important;
-    }
-
-    .stTextInput input:focus,
-    .stTextArea textarea:focus {
-        border-color: rgba(138, 180, 248, 0.38) !important;
-        box-shadow: 0 0 0 1px rgba(138, 180, 248, 0.18);
+        border-radius: 14px !important;
     }
 
     .stTextInput input::placeholder,
     .stTextArea textarea::placeholder {
-        color: #8f97a8 !important;
+        color: var(--muted-2) !important;
     }
 
-    /* botões */
+    .stTextInput input:focus,
+    .stTextArea textarea:focus {
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        box-shadow: none !important;
+    }
+
+    /* Buttons */
     .stButton > button,
     .stDownloadButton > button {
-        background: linear-gradient(180deg, #1c212b 0%, #181c24 100%);
-        color: #f4f6fb;
+        background: linear-gradient(180deg, #2a2a2a 0%, #242424 100%);
+        color: #f2f2f2;
         border: 1px solid var(--border);
         border-radius: 16px;
         min-height: 3rem;
         font-weight: 600;
         transition: 0.18s ease;
-        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+        box-shadow: none;
     }
 
     .stButton > button:hover,
     .stDownloadButton > button:hover {
-        background: linear-gradient(180deg, #242a36 0%, #1c2230 100%);
-        border-color: rgba(138, 180, 248, 0.25);
+        background: linear-gradient(180deg, #313131 0%, #2b2b2b 100%);
+        border-color: var(--border-strong);
         color: #ffffff;
-        transform: translateY(-1px);
     }
 
-    /* expander / alerts */
+    /* Expanders / alerts */
     div[data-testid="stExpander"] {
-        background: rgba(20, 24, 31, 0.92);
+        background: #1d1d1d;
         border: 1px solid var(--border);
         border-radius: 16px;
     }
 
     .stInfo, .stSuccess, .stWarning, .stError {
         border-radius: 16px;
-        background: rgba(20, 24, 31, 0.94);
+        background: #1e1e1e;
         border: 1px solid var(--border);
     }
 
-    /* uploader */
     section[data-testid="stFileUploaderDropzone"] {
-        background: rgba(20, 24, 31, 0.92);
-        border: 1px dashed rgba(138, 180, 248, 0.22);
+        background: #1d1d1d;
+        border: 1px dashed rgba(255, 255, 255, 0.14);
         border-radius: 18px;
     }
 
-    /* chat */
+    /* Chat area */
     [data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+        margin-bottom: 0.25rem;
     }
 
     [data-testid="stChatInput"] {
@@ -235,9 +232,9 @@ def apply_theme():
     }
 
     [data-testid="stChatInput"] > div {
-        background: linear-gradient(180deg, rgba(19, 22, 29, 0.96), rgba(16, 18, 24, 0.96));
+        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%);
         border: 1px solid var(--border);
-        border-radius: 22px;
+        border-radius: 24px;
         box-shadow: var(--shadow);
     }
 
@@ -254,16 +251,12 @@ def apply_theme():
         border-radius: 16px !important;
     }
 
-    /* links */
-    a {
-        color: var(--accent) !important;
-    }
-
+    /* Divider */
     hr {
         border-color: var(--border);
     }
 
-    /* KaTeX / LaTeX */
+    /* Keep LaTeX safe */
     .katex, .katex * {
         font-family: KaTeX_Main, Times New Roman, serif !important;
     }
