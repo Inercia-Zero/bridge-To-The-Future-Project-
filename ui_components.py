@@ -1,4 +1,5 @@
 import os
+import html
 import streamlit as st
 
 
@@ -96,31 +97,86 @@ def render_history_item(title: str, updated_at: str, active: bool):
     st.markdown(
         f"""
         <div class="{css}">
-            <div class="history-title">{title}</div>
-            <div class="history-meta">{updated_at[:16].replace("T", " ")}</div>
+            <div class="history-title">{html.escape(str(title))}</div>
+            <div class="history-meta">{html.escape(str(updated_at)[:16].replace("T", " "))}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
+def _escape_and_format_text(content: str) -> str:
+    """
+    Escapa HTML e preserva quebras de linha.
+    """
+    safe = html.escape(content or "")
+    return safe.replace("\n", "<br>")
+
+
 def render_message(item: dict):
     role = item.get("role", "assistant")
-    content = item.get("content", "")
+    content = item.get("content", "") or ""
     image_path = item.get("image_path")
+    attachment_labels = item.get("attachment_labels", []) or []
 
-    with st.chat_message("user" if role == "user" else "assistant"):
-        st.markdown(content, unsafe_allow_html=False)
+    is_user = role == "user"
 
-        if image_path and os.path.exists(image_path):
-            st.image(image_path, use_container_width=True)
+    row_class = "msg-row msg-row-user" if is_user else "msg-row msg-row-assistant"
+    bubble_class = "msg-bubble msg-bubble-user" if is_user else "msg-bubble msg-bubble-assistant"
+    meta_label = "Professor" if is_user else "Mestre"
+
+    has_text = bool(content.strip())
+    has_image = bool(image_path and os.path.exists(image_path))
+    has_attachments = bool(attachment_labels)
+
+    st.markdown(f'<div class="{row_class}">', unsafe_allow_html=True)
+
+    st.markdown(
+        f"""
+        <div class="{bubble_class}">
+            <div class="msg-meta">{meta_label}</div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if has_text:
+        formatted = _escape_and_format_text(content)
+        st.markdown(
+            f'<div class="msg-content">{formatted}</div>',
+            unsafe_allow_html=True,
+        )
+
+    if has_attachments:
+        for label in attachment_labels:
+            st.markdown(
+                f'<div class="msg-attachment">{html.escape(str(label))}</div>',
+                unsafe_allow_html=True,
+            )
+
+    if has_image:
+        st.image(image_path, use_container_width=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_context_chip(file_name: str, file_type: str):
     st.markdown(
         f"""
         <div class="context-chip">
-            <b>Contexto ativo:</b> {file_name} • {file_type}
+            <b>Contexto ativo:</b> {html.escape(str(file_name))} • {html.escape(str(file_type))}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_chat_topbar(master_title: str, professor_name: str):
+    st.markdown(
+        f"""
+        <div class="chat-sticky-top">
+            <div class="chat-sticky-master">{html.escape(str(master_title))}</div>
+            <div class="chat-sticky-professor">Professor {html.escape(str(professor_name))}</div>
         </div>
         """,
         unsafe_allow_html=True,
