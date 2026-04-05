@@ -7,6 +7,7 @@ def apply_theme():
     :root {
         --bg: #141414;
         --bg-2: #171717;
+        --bg-3: #1b1b1b;
         --sidebar: #161616;
         --panel: #1f1f1f;
         --panel-2: #232323;
@@ -16,7 +17,7 @@ def apply_theme():
         --text: #ececec;
         --muted: #a8a8a8;
         --muted-2: #8c8c8c;
-        --shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+        --shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
         --radius-lg: 22px;
         --radius-md: 16px;
         --radius-sm: 12px;
@@ -41,12 +42,10 @@ def apply_theme():
 
     .block-container {
         max-width: 1280px;
-        padding-top: 1.1rem;
+        padding-top: 1rem;
         padding-bottom: 1rem;
     }
 
-    /* esconde o que não interessa, mas preserva o toolbar/header
-       para o controle nativo da sidebar continuar aparecendo */
     #MainMenu,
     footer,
     div[data-testid="stDecoration"],
@@ -56,14 +55,12 @@ def apply_theme():
         position: fixed !important;
     }
 
-    /* header transparente */
     header[data-testid="stHeader"] {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }
 
-    /* toolbar visível, porém discreto */
     div[data-testid="stToolbar"] {
         background: transparent !important;
         border: none !important;
@@ -101,6 +98,54 @@ def apply_theme():
         color: var(--text) !important;
     }
 
+    .sidebar-brand {
+        background: linear-gradient(180deg, #202020 0%, #1a1a1a 100%);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow);
+    }
+
+    .sidebar-brand-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: #f4f4f4;
+    }
+
+    .sidebar-brand-sub {
+        margin-top: 0.28rem;
+        color: #d7d7d7;
+        font-weight: 600;
+        font-size: 0.98rem;
+    }
+
+    .sidebar-brand-user {
+        margin-top: 0.5rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+    }
+
+    .welcome-brand {
+        text-align: center;
+        margin-top: 24px;
+        margin-bottom: 10px;
+    }
+
+    .welcome-brand-title {
+        font-size: 2.6rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: #f4f4f4;
+    }
+
+    .welcome-brand-subtitle {
+        opacity: 0.82;
+        margin-top: 6px;
+        color: var(--muted);
+    }
+
     .stMarkdown, .stText, .stCaption, .stAlert,
     label, p, li, span, small, h1, h2, h3, h4, h5, h6 {
         color: var(--text) !important;
@@ -111,7 +156,7 @@ def apply_theme():
     }
 
     a {
-        color: #d8d8d8 !important;
+        color: #dddddd !important;
         text-decoration: none;
     }
 
@@ -127,16 +172,20 @@ def apply_theme():
     }
 
     .chat-topbar {
-        background: linear-gradient(180deg, #202020 0%, #1b1b1b 100%) !important;
+        position: sticky;
+        top: 0.6rem;
+        z-index: 25;
+        background: rgba(27, 27, 27, 0.92) !important;
+        backdrop-filter: blur(10px);
         border: 1px solid var(--border) !important;
         border-radius: var(--radius-lg);
         padding: 1.2rem 1.4rem;
-        margin-bottom: 1.15rem;
+        margin-bottom: 1rem;
         box-shadow: var(--shadow);
     }
 
     .chat-topbar-title {
-        font-size: 1.72rem;
+        font-size: 1.86rem;
         font-weight: 800;
         letter-spacing: -0.04em;
         color: #f4f4f4 !important;
@@ -144,10 +193,10 @@ def apply_theme():
     }
 
     .chat-topbar-meta {
-        margin-top: 0.42rem;
-        color: #b7b7b7 !important;
-        font-size: 1rem;
-        font-weight: 500;
+        margin-top: 0.36rem;
+        color: #c5c5c5 !important;
+        font-size: 1.02rem;
+        font-weight: 600;
     }
 
     .context-chip {
@@ -251,18 +300,19 @@ def apply_theme():
         border-radius: 18px !important;
     }
 
-    /* mensagens */
     [data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
-        margin-bottom: 0.55rem;
+        margin-bottom: 0.1rem;
     }
 
     .msg-row {
         display: flex;
+        align-items: flex-end;
+        gap: 0.8rem;
         width: 100%;
         margin: 0.35rem 0 1rem 0;
     }
@@ -275,39 +325,72 @@ def apply_theme():
         justify-content: flex-start;
     }
 
+    .msg-avatar {
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #2a2a2a;
+        color: #f4f4f4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        border: 1px solid var(--border);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.16);
+    }
+
+    .msg-avatar-user {
+        background: linear-gradient(180deg, #2b2b2b 0%, #222222 100%);
+    }
+
+    .msg-avatar-assistant {
+        background-color: #1f1f1f;
+    }
+
     .msg-bubble {
-        max-width: 82%;
+        max-width: min(78%, 760px);
         padding: 0.95rem 1rem;
-        border-radius: 18px;
+        border-radius: 22px;
         border: 1px solid var(--border);
         box-shadow: 0 10px 24px rgba(0,0,0,0.12);
     }
 
     .msg-bubble-user {
-        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%) !important;
+        background: linear-gradient(180deg, #262626 0%, #202020 100%) !important;
+        border-bottom-right-radius: 10px;
     }
 
     .msg-bubble-assistant {
         background: linear-gradient(180deg, #1d1d1d 0%, #181818 100%) !important;
+        border-bottom-left-radius: 10px;
     }
 
     .msg-meta {
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #b6b6b6 !important;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #bcbcbc !important;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         margin-bottom: 0.55rem;
     }
 
     .msg-markdown {
         color: var(--text) !important;
-        line-height: 1.62 !important;
+        line-height: 1.64 !important;
         font-size: 1rem !important;
     }
 
     .msg-markdown p:last-child {
         margin-bottom: 0 !important;
+    }
+
+    .msg-markdown ul,
+    .msg-markdown ol {
+        margin-bottom: 0.6rem !important;
     }
 
     .msg-attachment {
@@ -320,7 +403,6 @@ def apply_theme():
         font-size: 0.92rem;
     }
 
-    /* mata a barra/fundo do bloco inferior do chat */
     .stChatFloatingInputContainer,
     [data-testid="stBottom"],
     div[data-testid="stBottom"],
@@ -366,17 +448,18 @@ def apply_theme():
         background: #383838 !important;
     }
 
-    .stMarkdown pre {
+    .stMarkdown pre,
+    .msg-markdown pre {
         background: #1b1b1b !important;
         border: 1px solid var(--border) !important;
         border-radius: 14px !important;
     }
 
-    .stMarkdown code {
+    .stMarkdown code,
+    .msg-markdown code {
         color: #efefef !important;
     }
 
-    /* preserva latex */
     .katex-display {
         overflow-x: auto;
         overflow-y: hidden;
