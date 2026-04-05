@@ -19,6 +19,7 @@ def apply_theme():
         --shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
         --radius-lg: 22px;
         --radius-md: 16px;
+        --radius-sm: 12px;
     }
 
     html, body {
@@ -28,7 +29,6 @@ def apply_theme():
             "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* FUNDO GLOBAL SEM AZUL */
     .stApp,
     [data-testid="stAppViewContainer"],
     [data-testid="stMain"],
@@ -45,10 +45,10 @@ def apply_theme():
         padding-bottom: 1rem;
     }
 
-    /* ESCONDE O QUE NÃO PRESTA, MAS NÃO O HEADER */
+    /* esconde o que não interessa, mas preserva o toolbar/header
+       para o controle nativo da sidebar continuar aparecendo */
     #MainMenu,
     footer,
-    div[data-testid="stToolbar"],
     div[data-testid="stDecoration"],
     [data-testid="stStatusWidget"] {
         visibility: hidden !important;
@@ -56,19 +56,20 @@ def apply_theme():
         position: fixed !important;
     }
 
-    /* HEADER MANTIDO PARA A SETA DA SIDEBAR */
+    /* header transparente */
     header[data-testid="stHeader"] {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        height: 3rem !important;
     }
 
-    header[data-testid="stHeader"] * {
-        color: var(--text) !important;
+    /* toolbar visível, porém discreto */
+    div[data-testid="stToolbar"] {
+        background: transparent !important;
+        border: none !important;
     }
 
-    /* BOTÕES DO HEADER / SIDEBAR */
+    div[data-testid="stToolbar"] button,
     header[data-testid="stHeader"] button,
     [data-testid="collapsedControl"] button,
     [data-testid="stSidebarCollapsedControl"] button,
@@ -81,6 +82,7 @@ def apply_theme():
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
     }
 
+    div[data-testid="stToolbar"] button:hover,
     header[data-testid="stHeader"] button:hover,
     [data-testid="collapsedControl"] button:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover,
@@ -90,7 +92,6 @@ def apply_theme():
         border-color: var(--border-strong) !important;
     }
 
-    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #171717 0%, #141414 100%) !important;
         border-right: 1px solid var(--border) !important;
@@ -100,7 +101,6 @@ def apply_theme():
         color: var(--text) !important;
     }
 
-    /* TEXTO GERAL */
     .stMarkdown, .stText, .stCaption, .stAlert,
     label, p, li, span, small, h1, h2, h3, h4, h5, h6 {
         color: var(--text) !important;
@@ -119,7 +119,6 @@ def apply_theme():
         border-color: var(--border) !important;
     }
 
-    /* WRAPPERS */
     .chat-main-wrap {
         max-width: 980px;
         margin: 0 auto;
@@ -160,7 +159,6 @@ def apply_theme():
         margin-bottom: 0.85rem;
     }
 
-    /* HISTÓRICO */
     .history-card {
         background: linear-gradient(180deg, #252525 0%, #202020 100%) !important;
         border: 1px solid var(--border) !important;
@@ -195,7 +193,6 @@ def apply_theme():
         margin-top: 0.24rem;
     }
 
-    /* INPUTS */
     .stTextInput input,
     .stTextArea textarea,
     .stSelectbox div[data-baseweb="select"] > div,
@@ -218,7 +215,6 @@ def apply_theme():
         box-shadow: none !important;
     }
 
-    /* BOTÕES */
     .stButton > button,
     .stDownloadButton > button {
         background: linear-gradient(180deg, #2a2a2a 0%, #242424 100%) !important;
@@ -237,7 +233,6 @@ def apply_theme():
         color: #ffffff !important;
     }
 
-    /* ALERTAS / EXPANDER */
     div[data-testid="stExpander"] {
         background: #1d1d1d !important;
         border: 1px solid var(--border) !important;
@@ -256,7 +251,7 @@ def apply_theme():
         border-radius: 18px !important;
     }
 
-    /* MENSAGENS DO CHAT */
+    /* mensagens */
     [data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
@@ -266,26 +261,79 @@ def apply_theme():
         margin-bottom: 0.55rem;
     }
 
-    [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
-        line-height: 1.6;
-        font-size: 1rem;
-        background: transparent !important;
+    .msg-row {
+        display: flex;
+        width: 100%;
+        margin: 0.35rem 0 1rem 0;
     }
 
-    /* TIRA A BARRA/FUNDO AZUL DO BLOCO INFERIOR */
+    .msg-row-user {
+        justify-content: flex-end;
+    }
+
+    .msg-row-assistant {
+        justify-content: flex-start;
+    }
+
+    .msg-bubble {
+        max-width: 82%;
+        padding: 0.95rem 1rem;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+
+    .msg-bubble-user {
+        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%) !important;
+    }
+
+    .msg-bubble-assistant {
+        background: linear-gradient(180deg, #1d1d1d 0%, #181818 100%) !important;
+    }
+
+    .msg-meta {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #b6b6b6 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.55rem;
+    }
+
+    .msg-markdown {
+        color: var(--text) !important;
+        line-height: 1.62 !important;
+        font-size: 1rem !important;
+    }
+
+    .msg-markdown p:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    .msg-attachment {
+        margin-top: 0.7rem;
+        padding: 0.65rem 0.8rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--muted) !important;
+        font-size: 0.92rem;
+    }
+
+    /* mata a barra/fundo do bloco inferior do chat */
     .stChatFloatingInputContainer,
+    [data-testid="stBottom"],
+    div[data-testid="stBottom"],
     [data-testid="stBottomBlockContainer"],
     [data-testid="stBottomBlockContainer"] > div,
     [data-testid="stChatInputContainer"],
-    [data-testid="ScrollToBottomContainer"],
-    [data-testid="stChatInput"] + div {
-        background: transparent !important;
-        background-color: transparent !important;
+    [data-testid="ScrollToBottomContainer"] {
+        background: var(--bg) !important;
+        background-color: var(--bg) !important;
         border-top: none !important;
         box-shadow: none !important;
     }
 
-    /* INPUT DO CHAT */
     [data-testid="stChatInput"] {
         background: transparent !important;
         margin-top: 0.8rem;
@@ -318,7 +366,6 @@ def apply_theme():
         background: #383838 !important;
     }
 
-    /* CÓDIGO */
     .stMarkdown pre {
         background: #1b1b1b !important;
         border: 1px solid var(--border) !important;
@@ -329,7 +376,7 @@ def apply_theme():
         color: #efefef !important;
     }
 
-    /* LATEX */
+    /* preserva latex */
     .katex-display {
         overflow-x: auto;
         overflow-y: hidden;
