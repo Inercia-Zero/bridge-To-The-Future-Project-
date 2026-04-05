@@ -1,7 +1,8 @@
 import random
-from pathlib import Path
+import sqlite3
 
 import streamlit as st
+import db_core as db_module
 
 from theme import apply_theme
 from prompts import build_prompt, is_smalltalk
@@ -26,8 +27,11 @@ from ui_components import render_message, render_landing_screen
 # =========================================================
 # CONFIG
 # =========================================================
+PROJECT_TITLE = "Bridge to the Future Project"
+PROJECT_SUBTITLE = "Projeto do PIBID voltado ao apoio docente com IA"
+
 st.set_page_config(
-    page_title="Bridge to the Future",
+    page_title=PROJECT_TITLE,
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -42,9 +46,9 @@ init_materials_table()
 # ACESSOS
 # =========================================================
 USERS = {
-    "adenilson": "1234",
-    "orlando": "1234",
-    "francisco": "1234",
+    "Adenilson": "1234",
+    "Orlando": "1234",
+    "Mesquita": "1234",
 }
 
 
@@ -69,13 +73,25 @@ for key, value in DEFAULTS.items():
 # =========================================================
 # HELPERS
 # =========================================================
+def normalize_username(username: str) -> str:
+    return (username or "").strip().lower()
+
+
+def resolve_username(username: str) -> str | None:
+    normalized = normalize_username(username)
+    for display_name in USERS.keys():
+        if display_name.lower() == normalized:
+            return display_name
+    return None
+
+
 def get_owner() -> str:
-    return (st.session_state.get("display_name") or "").strip().lower()
+    return normalize_username(st.session_state.get("display_name") or "")
 
 
 def get_owner_display() -> str:
     owner = (st.session_state.get("display_name") or "").strip()
-    return owner.title() if owner else "Professor"
+    return owner or "Professor"
 
 
 def greeting_reply():
@@ -90,7 +106,55 @@ def greeting_reply():
 
 
 def login_ok(username: str, password: str) -> bool:
-    return USERS.get((username or "").strip().lower()) == password
+    canonical_name = resolve_username(username)
+    if not canonical_name:
+        return False
+    return USERS.get(canonical_name) == password
+
+
+def canonical_username(username: str) -> str:
+    return resolve_username(username) or (username or "").strip().title()
+
+
+def get_db_path() -> str:
+    for attr in ("DB_PATH", "db_path", "DATABASE_PATH"):
+        value = getattr(db_module, attr, None)
+        if value:
+            return str(value)
+    return "mentoredu.db"
+
+
+def rename_conversation_persistent(conversation_id: int, new_title: str) -> tuple[bool, str]:
+    title = (new_title or "").strip()
+    if not title:
+        return False, "Digite um novo título."
+
+    try:
+        with sqlite3.connect(get_db_path()) as conn:
+            conn.execute(
+                """
+                UPDATE conversations
+                SET title = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (title, conversation_id),
+            )
+            conn.commit()
+        return True, "Conversa renomeada."
+    except Exception as e:
+        return False, f"Não foi possível renomear: {e}"
+
+
+def delete_conversation_persistent(conversation_id: int) -> tuple[bool, str]:
+    try:
+        with sqlite3.connect(get_db_path()) as conn:
+            conn.execute("PRAGMA foreign_keys = ON")
+            conn.execute("DELETE FROM messages WHERE conversation_id = ?", (conversation_id,))
+            conn.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
+            conn.commit()
+        return True, "Conversa excluída."
+    except Exception as e:
+        return False, f"Não foi possível excluir: {e}"
 
 
 def go_to_welcome():
@@ -101,6 +165,19 @@ def go_to_welcome():
 def go_to_masters():
     st.session_state.page = "masters"
     st.rerun()
+
+
+def render_global_footer():
+    st.markdown(
+        """
+        <div class="app-footer-fixed">
+            <span>Bridge to the Future Project</span>
+            <span class="app-footer-sep">•</span>
+            <span>Desenvolvido por Iago Mesquita</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def open_area(area: str):
@@ -120,6 +197,17 @@ def open_conversation(conversation_id: int):
     st.session_state.current_conversation_id = conversation_id
     st.session_state.chat_history = load_messages_for_conversation(conversation_id)
     st.rerun()
+
+
+def open_fallback_conversation(area: str, owner: str):
+    remaining = list_conversations_by_mentor(area, owner)
+    if remaining:
+        new_id = remaining[0]["id"]
+    else:
+        new_id = ensure_default_conversation(area, owner)
+
+    st.session_state.current_conversation_id = new_id
+    st.session_state.chat_history = load_messages_for_conversation(new_id)
 
 
 def suggest_area_from_text(user_text: str):
@@ -163,12 +251,10 @@ def suggest_area_from_text(user_text: str):
 
 def render_top_brand():
     st.markdown(
-        """
+        f"""
         <div class="welcome-brand">
-            <div class="welcome-brand-title">Bridge to the Future</div>
-            <div class="welcome-brand-subtitle">
-                Projeto educacional para docentes da rede pública
-            </div>
+            <div class="welcome-brand-title">{PROJECT_TITLE}</div>
+            <div class="welcome-brand-subtitle">{PROJECT_SUBTITLE}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -207,7 +293,6 @@ def process_uploaded_files(uploaded_files):
     """
     attached_labels = []
     image_paths = []
-    image_names = []
     saved_items = []
 
     transient_context_text = None
@@ -218,7 +303,6 @@ def process_uploaded_files(uploaded_files):
         return {
             "attached_labels": attached_labels,
             "image_paths": image_paths,
-            "image_names": image_names,
             "saved_items": saved_items,
             "transient_context_text": transient_context_text,
             "transient_context_file_name": transient_context_file_name,
@@ -236,7 +320,6 @@ def process_uploaded_files(uploaded_files):
 
         if file_type == "image":
             image_paths.append(file_path)
-            image_names.append(file_name)
 
         if file_type == "pdf":
             transient_context_text = extract_pdf_text(file_path)
@@ -251,7 +334,6 @@ def process_uploaded_files(uploaded_files):
     return {
         "attached_labels": attached_labels,
         "image_paths": image_paths,
-        "image_names": image_names,
         "saved_items": saved_items,
         "transient_context_text": transient_context_text,
         "transient_context_file_name": transient_context_file_name,
@@ -303,9 +385,8 @@ def render_welcome_screen():
 
     username = st.text_input(
         "Usuário",
-        value=st.session_state.display_name,
         key="welcome_username",
-        placeholder="Ex: adenilson, orlando, francisco...",
+        placeholder="Ex: Mesquita, Orlando, Adenilson...",
     )
 
     password = st.text_input(
@@ -320,12 +401,11 @@ def render_welcome_screen():
 
     search_text = st.text_input(
         "Descreva sua necessidade",
-        value=st.session_state.welcome_search_text,
         key="welcome_search_text",
         placeholder="Ex: Gerar questões sobre MRU / Planejar aula sobre função afim / Formatar material em ABNT...",
     )
 
-    suggested = suggest_area_from_text(search_text)
+    suggested = suggest_area_from_text(search_text) if (search_text or "").strip() else None
     if suggested:
         st.success(f"Sugestão automática: {suggested}")
 
@@ -343,8 +423,8 @@ def render_welcome_screen():
             st.stop()
 
         st.session_state.logged = True
-        st.session_state.display_name = username.strip().lower()
-        st.session_state.selected_area = suggested
+        st.session_state.display_name = canonical_username(username)
+        st.session_state.selected_area = suggested if (search_text or "").strip() else None
         go_to_masters()
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -374,6 +454,9 @@ def render_masters_screen():
             st.session_state.selected_area = None
             st.session_state.current_conversation_id = None
             st.session_state.chat_history = []
+            st.session_state.welcome_search_text = ""
+            st.session_state.welcome_username = ""
+            st.session_state.welcome_password = ""
             go_to_welcome()
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -398,15 +481,17 @@ def render_chat_screen():
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
-    # =========================================================
-    # SIDEBAR
-    # =========================================================
     with st.sidebar:
-        st.markdown('<div class="sidebar-brand">', unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-brand-title">Bridge to the Future</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="sidebar-brand-sub">{area_info.get("title", area)}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="sidebar-brand-user">Professor {owner_display}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-kicker">{PROJECT_TITLE}</div>
+                <div class="sidebar-brand-title">{area_info.get("title", area)}</div>
+                <div class="sidebar-brand-user">Professor {owner_display}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
         c1, c2 = st.columns(2)
 
@@ -428,30 +513,60 @@ def render_chat_screen():
             st.caption("Nenhuma conversa ainda.")
         else:
             for conv in conversations:
-                active = conv["id"] == st.session_state.current_conversation_id
-                css = "history-card active" if active else "history-card"
+                conv_id = conv["id"]
+                conv_title = conv["title"]
+                conv_updated = str(conv["updated_at"])[:16].replace("T", " ")
+                active = conv_id == st.session_state.current_conversation_id
 
-                st.markdown(
-                    f"""
-                    <div class="{css}">
-                        <div class="history-title">{conv["title"]}</div>
-                        <div class="history-meta">{str(conv["updated_at"])[:16].replace('T', ' ')}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                left, right = st.columns([0.82, 0.18], gap="small")
 
-                if st.button("Abrir", key=f"open_conv_{conv['id']}", use_container_width=True):
-                    open_conversation(conv["id"])
+                with left:
+                    label = ("● " if active else "") + str(conv_title)
+                    if st.button(
+                        label,
+                        key=f"open_conv_{conv_id}",
+                        use_container_width=True,
+                    ):
+                        open_conversation(conv_id)
 
-    # =========================================================
-    # ÁREA PRINCIPAL
-    # =========================================================
+                    st.caption(conv_updated)
+
+                with right:
+                    with st.popover("⋮", key=f"menu_{conv_id}", width="content"):
+                        new_title = st.text_input(
+                            "Novo título",
+                            value=str(conv_title),
+                            key=f"rename_input_{conv_id}",
+                        )
+
+                        if st.button("Renomear", key=f"rename_btn_{conv_id}", use_container_width=True):
+                            ok, message = rename_conversation_persistent(conv_id, new_title)
+                            if ok:
+                                if conv_id == st.session_state.current_conversation_id:
+                                    st.session_state.chat_history = load_messages_for_conversation(conv_id)
+                                st.success(message)
+                                st.rerun()
+                            else:
+                                st.error(message)
+
+                        if st.button("Excluir conversa", key=f"delete_btn_{conv_id}", use_container_width=True):
+                            ok, message = delete_conversation_persistent(conv_id)
+                            if ok:
+                                if conv_id == st.session_state.current_conversation_id:
+                                    open_fallback_conversation(area, owner)
+                                st.success(message)
+                                st.rerun()
+                            else:
+                                st.error(message)
+
+                st.markdown("<div class='history-divider'></div>", unsafe_allow_html=True)
+
     st.markdown('<div class="chat-main-wrap">', unsafe_allow_html=True)
 
     st.markdown(
         f"""
         <div class="chat-topbar">
+            <div class="chat-topbar-kicker">{PROJECT_TITLE}</div>
             <div class="chat-topbar-title">{area_info.get("title", area)}</div>
             <div class="chat-topbar-meta">Professor {owner_display}</div>
         </div>
@@ -464,9 +579,6 @@ def render_chat_screen():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # =========================================================
-    # CHAT INPUT COM ANEXO NATIVO
-    # =========================================================
     submission = st.chat_input(
         f"Converse com o mestre de {area.lower()}...",
         key="main_chat_input",
@@ -478,6 +590,9 @@ def render_chat_screen():
     user_input, uploaded_files = normalize_chat_submission(submission)
 
     if submission is not None:
+        if not (user_input or "").strip() and not uploaded_files:
+            st.stop()
+
         cid = st.session_state.current_conversation_id
 
         attached_labels = []
@@ -499,20 +614,24 @@ def render_chat_screen():
                 st.stop()
 
         clean_text = (user_input or "").strip()
-        display_text = clean_text
+
+        non_image_attachment_labels = [
+            label for label in attached_labels
+            if not label.lower().startswith("📎 image")
+        ]
 
         user_item = {
             "role": "user",
-            "content": display_text,
+            "content": clean_text,
             "image_path": image_paths[0] if image_paths else None,
-            "attachment_labels": attached_labels,
+            "attachment_labels": non_image_attachment_labels,
         }
 
         st.session_state.chat_history.append(user_item)
         save_message(
             cid,
             "user",
-            display_text,
+            clean_text,
             image_path=image_paths[0] if image_paths else None,
         )
 
@@ -604,3 +723,5 @@ elif st.session_state.page == "chat":
     render_chat_screen()
 else:
     render_welcome_screen()
+
+render_global_footer()
