@@ -42,9 +42,8 @@ def apply_theme():
         padding-bottom: 1rem;
     }
 
-    /* esconder chrome do Streamlit */
+    /* Esconde elementos chatos do Streamlit, mas mantém o controle da sidebar */
     #MainMenu,
-    header[data-testid="stHeader"],
     footer,
     div[data-testid="stToolbar"],
     div[data-testid="stDecoration"],
@@ -52,6 +51,26 @@ def apply_theme():
         visibility: hidden !important;
         height: 0 !important;
         position: fixed !important;
+    }
+
+    /* Header transparente para não sumir a seta da sidebar */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    header[data-testid="stHeader"] button[kind="header"] {
+        background: rgba(35, 35, 35, 0.92) !important;
+        color: #f0f0f0 !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.18) !important;
+    }
+
+    header[data-testid="stHeader"] button[kind="header"]:hover {
+        background: rgba(46, 46, 46, 0.96) !important;
+        border: 1px solid rgba(255,255,255,0.14) !important;
     }
 
     /* sidebar */
@@ -234,23 +253,32 @@ def apply_theme():
         font-size: 1rem;
     }
 
-    /* caixas de texto dentro do chat, mais suaves */
     [data-testid="stChatMessage"] p,
     [data-testid="stChatMessage"] li {
         color: #ececec !important;
     }
 
+    /* remove a faixa azul/escura atrás do chat input */
+    .stChatFloatingInputContainer,
+    [data-testid="stBottomBlockContainer"],
+    [data-testid="stBottomBlockContainer"] > div,
+    [data-testid="stChatInputContainer"] {
+        background: transparent !important;
+        border-top: none !important;
+        box-shadow: none !important;
+    }
+
     /* input do chat */
     [data-testid="stChatInput"] {
-        background: transparent;
+        background: transparent !important;
         margin-top: 0.8rem;
     }
 
     [data-testid="stChatInput"] > div {
-        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%);
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        box-shadow: var(--shadow);
+        background: linear-gradient(180deg, #232323 0%, #1f1f1f 100%) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 24px !important;
+        box-shadow: var(--shadow) !important;
     }
 
     [data-testid="stChatInput"] textarea {
