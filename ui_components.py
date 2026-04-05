@@ -1,6 +1,11 @@
-import os
+import base64
 import html
+import mimetypes
+import os
+from functools import lru_cache
+
 import streamlit as st
+from masters import MASTERS
 
 
 def render_sidebar_brand():
@@ -105,6 +110,30 @@ def render_history_item(title: str, updated_at: str, active: bool):
     )
 
 
+@lru_cache(maxsize=32)
+def _image_to_data_url(path: str) -> str:
+    if not path or not os.path.exists(path):
+        return ""
+
+    mime, _ = mimetypes.guess_type(path)
+    mime = mime or "image/png"
+
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("utf-8")
+
+    return f"data:{mime};base64,{encoded}"
+
+
+def _assistant_avatar_data_url() -> str:
+    selected_area = st.session_state.get("selected_area")
+    if not selected_area:
+        return ""
+
+    data = MASTERS.get(selected_area, {})
+    image_path = data.get("image", "")
+    return _image_to_data_url(image_path)
+
+
 def render_message(item: dict):
     role = item.get("role", "assistant")
     content = item.get("content", "") or ""
@@ -115,13 +144,27 @@ def render_message(item: dict):
 
     row_class = "msg-row msg-row-user" if is_user else "msg-row msg-row-assistant"
     bubble_class = "msg-bubble msg-bubble-user" if is_user else "msg-bubble msg-bubble-assistant"
+    avatar_class = "msg-avatar msg-avatar-user" if is_user else "msg-avatar msg-avatar-assistant"
     meta_label = "Professor" if is_user else "Mestre"
 
     has_text = bool(content.strip())
     has_image = bool(image_path and os.path.exists(image_path))
     has_attachments = bool(attachment_labels)
 
-    st.markdown(f'<div class="{row_class}"><div class="{bubble_class}">', unsafe_allow_html=True)
+    assistant_avatar = _assistant_avatar_data_url()
+
+    st.markdown(f'<div class="{row_class}">', unsafe_allow_html=True)
+
+    if not is_user:
+        if assistant_avatar:
+            st.markdown(
+                f'<div class="{avatar_class}" style="background-image: url(\'{assistant_avatar}\');"></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(f'<div class="{avatar_class}">M</div>', unsafe_allow_html=True)
+
+    st.markdown(f'<div class="{bubble_class}">', unsafe_allow_html=True)
     st.markdown(f'<div class="msg-meta">{meta_label}</div>', unsafe_allow_html=True)
 
     if has_text:
@@ -139,7 +182,12 @@ def render_message(item: dict):
     if has_image:
         st.image(image_path, use_container_width=True)
 
-    st.markdown("</div></div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if is_user:
+        st.markdown(f'<div class="{avatar_class}">P</div>', unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def render_context_chip(file_name: str, file_type: str):
