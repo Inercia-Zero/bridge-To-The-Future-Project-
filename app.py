@@ -75,6 +75,10 @@ for key, value in DEFAULTS.items():
 # =========================================================
 # HELPERS
 # =========================================================
+def get_owner() -> str:
+    return (st.session_state.get("display_name") or "").strip().lower()
+
+
 def greeting_reply():
     respostas = [
         "E aí! Bora planejar algo bom?",
@@ -90,9 +94,18 @@ def login_ok(username: str, password: str) -> bool:
     return USERS.get((username or "").strip().lower()) == password
 
 
-def get_user_subject_key(area: str) -> str:
-    user = (st.session_state.display_name or "").strip().lower()
-    return f"{area}__{user}"
+def get_uploader_key(area: str) -> str:
+    owner = get_owner()
+    safe_area = (area or "geral").replace(" ", "_").lower()
+    safe_owner = owner or "anon"
+    return f"uploader_{safe_area}_{safe_owner}"
+
+
+def clear_active_context():
+    st.session_state.context_file_path = None
+    st.session_state.context_file_name = None
+    st.session_state.context_file_type = None
+    st.session_state.context_text = None
 
 
 def go_to_welcome():
@@ -106,21 +119,18 @@ def go_to_masters():
 
 
 def open_area(area: str):
-    subject_key = (area,st.session_state.display_name)
+    owner = get_owner()
 
     st.session_state.selected_area = area
     st.session_state.page = "chat"
 
-    cid = ensure_default_conversation(area)
+    cid = ensure_default_conversation(area, owner)
     st.session_state.current_conversation_id = cid
     st.session_state.chat_history = load_messages_for_conversation(cid)
 
     st.session_state.show_attach_panel = False
     st.session_state.show_materials_panel = False
-    st.session_state.context_file_path = None
-    st.session_state.context_file_name = None
-    st.session_state.context_file_type = None
-    st.session_state.context_text = None
+    clear_active_context()
 
     st.rerun()
 
@@ -269,6 +279,9 @@ def render_masters_screen():
             st.session_state.selected_area = None
             st.session_state.current_conversation_id = None
             st.session_state.chat_history = []
+            st.session_state.show_attach_panel = False
+            st.session_state.show_materials_panel = False
+            clear_active_context()
             go_to_welcome()
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -279,16 +292,16 @@ def render_masters_screen():
 # =========================================================
 def render_chat_screen():
     area = st.session_state.selected_area
+    owner = get_owner()
 
     if not area:
         go_to_masters()
         return
 
-    area_info = MASTERS[area]
-    subject_key = get_user_subject_key(area)
+    area_info = MASTERS.get(area, {"title": area, "description": ""})
 
     if st.session_state.current_conversation_id is None:
-        cid = get_active_conversation_id(area,st.session_state.displat_name) or ensure_default_conversation(area,st.session_state.displat_name)
+        cid = get_active_conversation_id(area, owner) or ensure_default_conversation(area, owner)
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
@@ -297,7 +310,7 @@ def render_chat_screen():
     with sidebar:
         st.markdown("### Bridge to the Future")
         st.caption(area_info.get("title", area))
-        st.caption(f"Usuário: {st.session_state.display_name}")
+        st.caption(f"Usuário: {owner}")
 
         c1, c2 = st.columns(2)
 
@@ -307,14 +320,16 @@ def render_chat_screen():
 
         with c2:
             if st.button("Nova", use_container_width=True):
-                new_id = create_new_conversation(area,st.session_state.displat_name)
+                new_id = create_new_conversation(area, owner)
                 st.session_state.current_conversation_id = new_id
                 st.session_state.chat_history = []
+                st.session_state.show_attach_panel = False
+                clear_active_context()
                 st.rerun()
 
         st.markdown("### Histórico")
 
-        conversations = list_conversations_by_mentor(area,st.session_state.displat_names)
+        conversations = list_conversations_by_mentor(area, owner)
         if not conversations:
             st.caption("Nenhuma conversa ainda.")
         else:
@@ -390,17 +405,14 @@ def render_chat_screen():
 
         with a2:
             if st.session_state.context_file_name and st.button("Remover", use_container_width=True):
-                st.session_state.context_file_path = None
-                st.session_state.context_file_name = None
-                st.session_state.context_file_type = None
-                st.session_state.context_text = None
+                clear_active_context()
                 st.rerun()
 
         if st.session_state.show_attach_panel:
             uploaded = st.file_uploader(
                 "Escolha PDF, imagem ou TXT",
                 type=["pdf", "png", "jpg", "jpeg", "webp", "txt"],
-                key=f"uploader_{subject_key}",
+                key=get_uploader_key(area),
                 label_visibility="collapsed",
             )
 
