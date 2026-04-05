@@ -105,14 +105,6 @@ def render_history_item(title: str, updated_at: str, active: bool):
     )
 
 
-def _escape_and_format_text(content: str) -> str:
-    """
-    Escapa HTML e preserva quebras de linha.
-    """
-    safe = html.escape(content or "")
-    return safe.replace("\n", "<br>")
-
-
 def render_message(item: dict):
     role = item.get("role", "assistant")
     content = item.get("content", "") or ""
@@ -129,22 +121,13 @@ def render_message(item: dict):
     has_image = bool(image_path and os.path.exists(image_path))
     has_attachments = bool(attachment_labels)
 
-    st.markdown(f'<div class="{row_class}">', unsafe_allow_html=True)
-
-    st.markdown(
-        f"""
-        <div class="{bubble_class}">
-            <div class="msg-meta">{meta_label}</div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<div class="{row_class}"><div class="{bubble_class}">', unsafe_allow_html=True)
+    st.markdown(f'<div class="msg-meta">{meta_label}</div>', unsafe_allow_html=True)
 
     if has_text:
-        formatted = _escape_and_format_text(content)
-        st.markdown(
-            f'<div class="msg-content">{formatted}</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="msg-markdown">', unsafe_allow_html=True)
+        st.markdown(content, unsafe_allow_html=False)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     if has_attachments:
         for label in attachment_labels:
@@ -156,8 +139,7 @@ def render_message(item: dict):
     if has_image:
         st.image(image_path, use_container_width=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 def render_context_chip(file_name: str, file_type: str):
