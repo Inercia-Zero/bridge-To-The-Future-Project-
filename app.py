@@ -272,6 +272,7 @@ def render_masters_screen():
     render_landing_screen(MASTERS, open_area)
 
     c1, c2 = st.columns(2)
+
     with c1:
         if st.button("Sair", use_container_width=True):
             st.session_state.logged = False
@@ -305,7 +306,7 @@ def render_chat_screen():
         st.session_state.current_conversation_id = cid
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
-    sidebar, main = st.columns([1.15, 4.2], gap="medium")
+    sidebar, main = st.columns([1.12, 4.35], gap="medium")
 
     with sidebar:
         st.markdown("### Bridge to the Future")
@@ -366,15 +367,13 @@ def render_chat_screen():
                 st.caption("Nenhum material cadastrado.")
 
     with main:
+        st.markdown('<div class="chat-main-wrap">', unsafe_allow_html=True)
+
         st.markdown(
             f"""
-            <div class="chat-header-card">
-                <div class="chat-title">Bridge to the Future</div>
-                <div class="chat-sub">Projeto educacional para auxílio a docentes da rede pública.</div>
-                <div class="chat-mentor-box">
-                    <div class="chat-mentor-title">{area_info.get("title", area)}</div>
-                    <div class="small-muted">{area_info.get("description", "")}</div>
-                </div>
+            <div class="chat-topbar">
+                <div class="chat-topbar-title">{area_info.get("title", area)}</div>
+                <div class="chat-topbar-meta">{owner}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -396,19 +395,29 @@ def render_chat_screen():
         for item in st.session_state.chat_history:
             render_message(item)
 
-        a1, a2, _ = st.columns([1.1, 1.2, 4.7])
+        st.markdown("</div>", unsafe_allow_html=True)
 
-        with a1:
-            if st.button("📎 Anexar", use_container_width=True):
+        toolbar_left, toolbar_mid, toolbar_right = st.columns([0.12, 0.12, 0.76], gap="small")
+
+        with toolbar_left:
+            if st.button("＋", use_container_width=True):
                 st.session_state.show_attach_panel = not st.session_state.show_attach_panel
                 st.rerun()
 
-        with a2:
-            if st.session_state.context_file_name and st.button("Remover", use_container_width=True):
-                clear_active_context()
-                st.rerun()
+        with toolbar_mid:
+            if st.session_state.context_file_name:
+                if st.button("✕", use_container_width=True):
+                    clear_active_context()
+                    st.rerun()
+            else:
+                st.markdown("<div style='height: 42px;'></div>", unsafe_allow_html=True)
+
+        with toolbar_right:
+            st.markdown("<div style='height: 42px;'></div>", unsafe_allow_html=True)
 
         if st.session_state.show_attach_panel:
+            st.markdown('<div class="chat-main-wrap">', unsafe_allow_html=True)
+
             uploaded = st.file_uploader(
                 "Escolha PDF, imagem ou TXT",
                 type=["pdf", "png", "jpg", "jpeg", "webp", "txt"],
@@ -435,6 +444,8 @@ def render_chat_screen():
                         st.session_state.context_text = None
 
                     st.success(f"Arquivo ativo: {file_name}")
+
+            st.markdown("</div>", unsafe_allow_html=True)
 
         user_input = st.chat_input(f"Converse com o mestre de {area.lower()}...")
 
