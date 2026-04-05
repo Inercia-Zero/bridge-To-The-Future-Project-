@@ -21,7 +21,7 @@ from db_core import (
 from attachments import validate_upload, save_upload, extract_pdf_text
 from graph_tools import maybe_generate_graph
 from geometry_tools import maybe_generate_geometry_visual
-from ui_components import render_message, render_landing_screen
+from ui_components import render_landing_screen
 from materials import render_materials_admin
 
 
@@ -47,6 +47,7 @@ USERS = {
     "adenilson": "1234",
     "orlando": "1234",
     "francisco": "1234",
+    "mesquita": "1234",
 }
 
 
@@ -78,6 +79,23 @@ for key, value in DEFAULTS.items():
 # =========================================================
 def get_owner() -> str:
     return (st.session_state.get("display_name") or "").strip().lower()
+
+
+def format_person_name(name: str) -> str:
+    name = (name or "").strip()
+    if not name:
+        return ""
+    return " ".join(part[:1].upper() + part[1:].lower() for part in name.split())
+
+
+def get_professor_label() -> str:
+    owner = get_owner()
+    formatted = format_person_name(owner)
+    return f"Professor {formatted}" if formatted else "Professor"
+
+
+def get_master_label(area: str) -> str:
+    return f"Mestre de {area}" if area else "Mestre"
 
 
 def greeting_reply():
@@ -175,9 +193,9 @@ def suggest_area_from_text(user_text: str):
 def render_top_brand():
     st.markdown(
         """
-        <div style="text-align:center; margin-top: 24px; margin-bottom: 6px;">
-            <div style="font-size: 2.6rem; font-weight: 900;">Bridge to the Future</div>
-            <div style="opacity: 0.75; margin-top: 6px;">
+        <div class="welcome-brand-wrap">
+            <div class="welcome-brand-title">Bridge to the Future</div>
+            <div class="welcome-brand-sub">
                 Projeto educacional para docentes da rede pública
             </div>
         </div>
@@ -209,74 +227,7 @@ def build_file_badge(file_name: str, file_type: str) -> str:
     return f"📎 {label}: {file_name}"
 
 
-def process_uploaded_files(uploaded_files):
-    """
-    Processa arquivos enviados pelo chat_input.
-    Regras:
-    - PDF/TXT viram contexto persistente ativo
-    - Imagem NÃO vira contexto global automaticamente
-    - Imagem pode ser analisada apenas na mensagem atual
-    """
-    attached_labels = []
-    image_paths = []
-    image_names = []
-    saved_items = []
-
-    if not uploaded_files:
-        return {
-            "attached_labels": attached_labels,
-            "image_paths": image_paths,
-            "image_names": image_names,
-            "saved_items": saved_items,
-        }
-
-    for uploaded in uploaded_files:
-        error = validate_upload(uploaded)
-        if error:
-            raise ValueError(error)
-
-        file_path, file_name, file_type = save_upload(uploaded)
-        saved_items.append((file_path, file_name, file_type))
-        attached_labels.append(build_file_badge(file_name, file_type))
-
-        if file_type == "image":
-            image_paths.append(file_path)
-            image_names.append(file_name)
-
-    # Define contexto persistente apenas para o último PDF/TXT enviado
-    last_context_item = None
-    for file_path, file_name, file_type in reversed(saved_items):
-        if file_type in ("pdf", "text"):
-            last_context_item = (file_path, file_name, file_type)
-            break
-
-    if last_context_item:
-        file_path, file_name, file_type = last_context_item
-        st.session_state.context_file_path = file_path
-        st.session_state.context_file_name = file_name
-        st.session_state.context_file_type = file_type
-
-        if file_type == "pdf":
-            st.session_state.context_text = extract_pdf_text(file_path)
-        elif file_type == "text":
-            with open(file_path, "r", encoding="utf-8") as f:
-                st.session_state.context_text = f.read()
-    # imagem não substitui o contexto persistente
-
-    return {
-        "attached_labels": attached_labels,
-        "image_paths": image_paths,
-        "image_names": image_names,
-        "saved_items": saved_items,
-    }
-
-
 def normalize_chat_submission(submission):
-    """
-    st.chat_input:
-    - sem accept_file => retorna string ou None
-    - com accept_file => retorna objeto dict-like com .text e .files
-    """
     if submission is None:
         return "", []
 
@@ -299,32 +250,87 @@ def normalize_chat_submission(submission):
     return text, files
 
 
-def render_user_inline_attachments(item: dict):
+def process_uploaded_files(uploaded_files):
+    attached_labels = []
+    image_paths = []
+    saved_items = []
+
+    if not uploaded_files:
+        return {
+            "attached_labels": attached_labels,
+            "image_paths": image_paths,
+            "saved_items": saved_items,
+        }
+
+    for uploaded in uploaded_files:
+        error = validate_upload(uploaded)
+        if error:
+            raise ValueError(error)
+
+        file_path, file_name, file_type = save_upload(uploaded)
+        saved_items.append((file_path, file_name, file_type))
+        attached_labels.append(build_file_badge(file_name, file_type))
+
+        if file_type == "image":
+            image_paths.append(file_path)
+
+    # Apenas PDF/TXT ativam contexto persistente
+    last_context_item = None
+    for file_path, file_name, file_type in reversed(saved_items):
+        if file_type in ("pdf", "text"):
+            last_context_item = (file_path, file_name, file_type)
+            break
+
+    if last_context_item:
+        file_path, file_name, file_type = last_context_item
+        st.session_state.context_file_path = file_path
+        st.session_state.context_file_name = file_name
+        st.session_state.context_file_type = file_type
+
+        if file_type == "pdf":
+            st.session_state.context_text = extract_pdf_text(file_path)
+        elif file_type == "text":
+            with open(file_path, "r", encoding="utf-8") as f:
+                st.session_state.context_text = f.read()
+
+    return {
+        "attached_labels": attached_labels,
+        "image_paths": image_paths,
+        "saved_items": saved_items,
+    }
+
+
+def render_chat_bubble(item: dict):
+    role = item.get("role", "assistant")
+    content = (item.get("content") or "").strip()
     image_path = item.get("image_path")
     attachment_labels = item.get("attachment_labels", [])
 
-    if image_path and Path(image_path).exists():
-        st.image(image_path, use_container_width=True)
+    wrapper_class = "chat-row user-row" if role == "user" else "chat-row assistant-row"
+    bubble_class = "chat-bubble user-bubble" if role == "user" else "chat-bubble assistant-bubble"
 
-    if attachment_labels:
-        for label in attachment_labels:
-            st.caption(label)
-
-
-def render_chat_item(item: dict):
-    content = (item.get("content") or "").strip()
-    role = item.get("role", "")
+    html_parts = [f'<div class="{wrapper_class}"><div class="{bubble_class}">']
 
     if content:
-        render_message(item)
+        safe_content = content.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        safe_content = safe_content.replace("\n", "<br>")
+        html_parts.append(f'<div class="bubble-text">{safe_content}</div>')
 
-    # Para imagem do usuário ficar visível no chat
-    if role == "user":
-        render_user_inline_attachments(item)
-    else:
-        # evita duplicar gráfico/imagem do assistente se render_message já mostrar
-        if not content and item.get("image_path") and Path(item["image_path"]).exists():
-            st.image(item["image_path"], use_container_width=True)
+    if attachment_labels:
+        html_parts.append('<div class="bubble-attachments">')
+        for label in attachment_labels:
+            safe_label = label.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            html_parts.append(f'<div class="attachment-line">{safe_label}</div>')
+        html_parts.append("</div>")
+
+    html_parts.append("</div></div>")
+    st.markdown("".join(html_parts), unsafe_allow_html=True)
+
+    if image_path and Path(image_path).exists():
+        image_col_left, image_col_mid, image_col_right = st.columns([1, 6, 1])
+        target_col = image_col_right if role == "assistant" else image_col_left
+        with target_col:
+            st.image(image_path, use_container_width=True)
 
 
 # =========================================================
@@ -341,7 +347,7 @@ def render_welcome_screen():
         "Usuário",
         value=st.session_state.display_name,
         key="welcome_username",
-        placeholder="Ex: adenilson, orlando, francisco...",
+        placeholder="Ex: seu usuário",
     )
 
     password = st.text_input(
@@ -358,7 +364,7 @@ def render_welcome_screen():
         "Descreva sua necessidade",
         value=st.session_state.welcome_search_text,
         key="welcome_search_text",
-        placeholder="Ex: Gerar questões sobre MRU / Planejar aula sobre função afim / Formatar material em ABNT...",
+        placeholder="Ex: planejar aula, gerar questões, analisar PDF, explicar conteúdo...",
     )
 
     suggested = suggest_area_from_text(search_text)
@@ -393,7 +399,7 @@ def render_masters_screen():
     st.markdown("<div style='max-width: 1120px; margin: 0 auto;'>", unsafe_allow_html=True)
 
     st.markdown(
-        f"### Bem-vindo, **{st.session_state.display_name}**. Escolha seu mestre."
+        f"### Bem-vindo, **{format_person_name(st.session_state.display_name)}**. Escolha seu mestre."
     )
 
     if st.session_state.selected_area:
@@ -401,7 +407,7 @@ def render_masters_screen():
 
     render_landing_screen(MASTERS, open_area)
 
-    c1, c2 = st.columns(2)
+    c1, _ = st.columns(2)
 
     with c1:
         if st.button("Sair", use_container_width=True):
@@ -428,8 +434,6 @@ def render_chat_screen():
         go_to_masters()
         return
 
-    area_info = MASTERS.get(area, {"title": area, "description": ""})
-
     if st.session_state.current_conversation_id is None:
         cid = get_active_conversation_id(area, owner) or ensure_default_conversation(area, owner)
         st.session_state.current_conversation_id = cid
@@ -440,8 +444,8 @@ def render_chat_screen():
     # =========================================================
     with st.sidebar:
         st.markdown("## Bridge to the Future")
-        st.caption(area_info.get("title", area))
-        st.caption(f"Professor: {owner}")
+        st.caption(get_master_label(area))
+        st.caption(get_professor_label())
 
         c1, c2 = st.columns(2)
 
@@ -497,19 +501,19 @@ def render_chat_screen():
                 st.caption("Nenhum material cadastrado.")
 
     # =========================================================
-    # ÁREA PRINCIPAL
+    # CABEÇALHO FIXO VISUAL DO CHAT
     # =========================================================
-    st.markdown('<div class="chat-main-wrap">', unsafe_allow_html=True)
-
     st.markdown(
         f"""
-        <div class="chat-topbar">
-            <div class="chat-topbar-title">{area_info.get("title", area)}</div>
-            <div class="chat-topbar-meta">Professor: {owner}</div>
+        <div class="sticky-chat-header">
+            <div class="sticky-master-title">{get_master_label(area)}</div>
+            <div class="sticky-professor-sub">{get_professor_label()}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+    st.markdown('<div class="chat-main-wrap">', unsafe_allow_html=True)
 
     if st.session_state.show_materials_panel:
         render_materials_admin(default_subject=area)
@@ -524,28 +528,37 @@ def render_chat_screen():
             unsafe_allow_html=True,
         )
 
-        clear_col1, clear_col2 = st.columns([0.22, 0.78], gap="small")
-        with clear_col1:
+        cctx1, cctx2 = st.columns([0.24, 0.76])
+        with cctx1:
             if st.button("Remover contexto", use_container_width=True):
                 clear_active_context()
                 st.rerun()
-        with clear_col2:
+        with cctx2:
             st.markdown("")
 
+    if not st.session_state.chat_history:
+        st.markdown(
+            """
+            <div class="empty-chat-state">
+                Comece a conversa com seu mestre. Você também pode anexar PDF, texto ou imagem no campo de mensagem.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     for item in st.session_state.chat_history:
-        render_chat_item(item)
+        render_chat_bubble(item)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
     # =========================================================
-    # CHAT INPUT COM ANEXO NATIVO
+    # CHAT INPUT NATIVO
     # =========================================================
     submission = st.chat_input(
         f"Converse com o mestre de {area.lower()}...",
         key="main_chat_input",
         accept_file="multiple",
         file_type=["pdf", "png", "jpg", "jpeg", "webp", "txt"],
-        max_upload_size=25,
     )
 
     user_input, uploaded_files = normalize_chat_submission(submission)
@@ -555,37 +568,36 @@ def render_chat_screen():
 
         attached_labels = []
         image_paths = []
-        image_names = []
 
         if uploaded_files:
             try:
                 processed = process_uploaded_files(uploaded_files)
                 attached_labels = processed["attached_labels"]
                 image_paths = processed["image_paths"]
-                image_names = processed["image_names"]
             except Exception as e:
                 st.error(f"Erro ao processar arquivo: {e}")
                 st.stop()
 
-        # conteúdo do usuário
         clean_text = (user_input or "").strip()
         display_text = clean_text
 
-        # Se vier só imagem, não escreve "imagem enviada"
-        # deixa a imagem aparecer no chat e o texto pode ficar vazio
-        if not display_text and attached_labels and not image_paths:
-            display_text = "\n".join(attached_labels)
-        elif display_text and attached_labels:
-            display_text = f"{display_text}\n\n" + "\n".join(attached_labels)
+        non_image_labels = attached_labels[:]
+        if image_paths:
+            non_image_labels = [
+                label for label in attached_labels
+                if "IMAGE:" not in label.upper() and "IMAGEM:" not in label.upper()
+            ]
+
+        if not display_text and non_image_labels:
+            display_text = "\n".join(non_image_labels)
+        elif display_text and non_image_labels:
+            display_text = f"{display_text}\n\n" + "\n".join(non_image_labels)
 
         user_item = {
             "role": "user",
             "content": display_text,
             "image_path": image_paths[0] if image_paths else None,
-            "attachment_labels": attached_labels if not image_paths else [
-                label for label in attached_labels
-                if not label.lower().startswith("📎 image")
-            ],
+            "attachment_labels": non_image_labels,
         }
 
         st.session_state.chat_history.append(user_item)
@@ -599,7 +611,6 @@ def render_chat_screen():
         graph_path = None
         graph_meta = {}
 
-        # tenta gráficos antes da IA apenas se houver texto
         if clean_text:
             try:
                 graph_result = maybe_generate_graph(clean_text, area)
@@ -629,14 +640,13 @@ def render_chat_screen():
             resposta = greeting_reply()
         else:
             try:
-                # imagem anexada nesta mensagem = contexto momentâneo, não persistente
                 use_vision_now = should_use_vision(clean_text, image_paths)
 
                 if not clean_text and image_paths:
                     prompt = (
                         "O professor enviou uma imagem. "
-                        "Responda de forma breve dizendo que a imagem foi recebida "
-                        "e peça o que exatamente ele quer analisar nela."
+                        "Responda de forma breve confirmando o recebimento e "
+                        "peça o que exatamente ele deseja analisar nela."
                     )
                     resposta = ask_vision_ai(prompt, image_paths[0])
                 else:
@@ -667,6 +677,7 @@ def render_chat_screen():
             "role": "assistant",
             "content": resposta,
             "image_path": image_path,
+            "attachment_labels": [],
         }
 
         st.session_state.chat_history.append(assistant_item)
