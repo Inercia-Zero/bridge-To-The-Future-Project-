@@ -16,13 +16,11 @@ from db_core import (
     load_messages_for_conversation,
     save_message,
     create_new_conversation,
-    list_materials,
 )
 from attachments import validate_upload, save_upload, extract_pdf_text
 from graph_tools import maybe_generate_graph
 from geometry_tools import maybe_generate_geometry_visual
 from ui_components import render_message, render_landing_screen
-from materials import render_materials_admin
 
 
 # =========================================================
@@ -61,11 +59,6 @@ DEFAULTS = {
     "welcome_search_text": "",
     "current_conversation_id": None,
     "chat_history": [],
-    "show_materials_panel": False,
-    "context_file_path": None,
-    "context_file_name": None,
-    "context_file_type": None,
-    "context_text": None,
 }
 
 for key, value in DEFAULTS.items():
@@ -78,6 +71,11 @@ for key, value in DEFAULTS.items():
 # =========================================================
 def get_owner() -> str:
     return (st.session_state.get("display_name") or "").strip().lower()
+
+
+def get_owner_display() -> str:
+    owner = (st.session_state.get("display_name") or "").strip()
+    return owner.title() if owner else "Professor"
 
 
 def greeting_reply():
@@ -93,13 +91,6 @@ def greeting_reply():
 
 def login_ok(username: str, password: str) -> bool:
     return USERS.get((username or "").strip().lower()) == password
-
-
-def clear_active_context():
-    st.session_state.context_file_path = None
-    st.session_state.context_file_name = None
-    st.session_state.context_file_type = None
-    st.session_state.context_text = None
 
 
 def go_to_welcome():
@@ -122,8 +113,6 @@ def open_area(area: str):
     st.session_state.current_conversation_id = cid
     st.session_state.chat_history = load_messages_for_conversation(cid)
 
-    st.session_state.show_materials_panel = False
-    clear_active_context()
     st.rerun()
 
 
@@ -175,9 +164,9 @@ def suggest_area_from_text(user_text: str):
 def render_top_brand():
     st.markdown(
         """
-        <div style="text-align:center; margin-top: 24px; margin-bottom: 6px;">
-            <div style="font-size: 2.6rem; font-weight: 900;">Bridge to the Future</div>
-            <div style="opacity: 0.75; margin-top: 6px;">
+        <div class="welcome-brand">
+            <div class="welcome-brand-title">Bridge to the Future</div>
+            <div class="welcome-brand-subtitle">
                 Projeto educacional para docentes da rede pública
             </div>
         </div>
@@ -211,16 +200,19 @@ def build_file_badge(file_name: str, file_type: str) -> str:
 
 def process_uploaded_files(uploaded_files):
     """
-    Processa arquivos enviados pelo chat_input.
-    Regras:
-    - PDF/TXT viram contexto persistente ativo
-    - Imagem NÃO vira contexto global automaticamente
-    - Imagem pode ser analisada apenas na mensagem atual
+    Regras do chat:
+    - imagem/pdf/txt entram como anexos da mensagem atual
+    - não viram contexto global da conversa
+    - PDF/TXT geram contexto transitório só para esta resposta
     """
     attached_labels = []
     image_paths = []
     image_names = []
     saved_items = []
+
+    transient_context_text = None
+    transient_context_file_name = None
+    transient_context_file_type = None
 
     if not uploaded_files:
         return {
@@ -228,6 +220,9 @@ def process_uploaded_files(uploaded_files):
             "image_paths": image_paths,
             "image_names": image_names,
             "saved_items": saved_items,
+            "transient_context_text": transient_context_text,
+            "transient_context_file_name": transient_context_file_name,
+            "transient_context_file_type": transient_context_file_type,
         }
 
     for uploaded in uploaded_files:
@@ -243,31 +238,24 @@ def process_uploaded_files(uploaded_files):
             image_paths.append(file_path)
             image_names.append(file_name)
 
-    # Define contexto persistente apenas para o último PDF/TXT enviado
-    last_context_item = None
-    for file_path, file_name, file_type in reversed(saved_items):
-        if file_type in ("pdf", "text"):
-            last_context_item = (file_path, file_name, file_type)
-            break
-
-    if last_context_item:
-        file_path, file_name, file_type = last_context_item
-        st.session_state.context_file_path = file_path
-        st.session_state.context_file_name = file_name
-        st.session_state.context_file_type = file_type
-
         if file_type == "pdf":
-            st.session_state.context_text = extract_pdf_text(file_path)
+            transient_context_text = extract_pdf_text(file_path)
+            transient_context_file_name = file_name
+            transient_context_file_type = file_type
         elif file_type == "text":
             with open(file_path, "r", encoding="utf-8") as f:
-                st.session_state.context_text = f.read()
-    # imagem não substitui o contexto persistente
+                transient_context_text = f.read()
+            transient_context_file_name = file_name
+            transient_context_file_type = file_type
 
     return {
         "attached_labels": attached_labels,
         "image_paths": image_paths,
         "image_names": image_names,
         "saved_items": saved_items,
+        "transient_context_text": transient_context_text,
+        "transient_context_file_name": transient_context_file_name,
+        "transient_context_file_type": transient_context_file_type,
     }
 
 
@@ -299,32 +287,8 @@ def normalize_chat_submission(submission):
     return text, files
 
 
-def render_user_inline_attachments(item: dict):
-    image_path = item.get("image_path")
-    attachment_labels = item.get("attachment_labels", [])
-
-    if image_path and Path(image_path).exists():
-        st.image(image_path, use_container_width=True)
-
-    if attachment_labels:
-        for label in attachment_labels:
-            st.caption(label)
-
-
 def render_chat_item(item: dict):
-    content = (item.get("content") or "").strip()
-    role = item.get("role", "")
-
-    if content:
-        render_message(item)
-
-    # Para imagem do usuário ficar visível no chat
-    if role == "user":
-        render_user_inline_attachments(item)
-    else:
-        # evita duplicar gráfico/imagem do assistente se render_message já mostrar
-        if not content and item.get("image_path") and Path(item["image_path"]).exists():
-            st.image(item["image_path"], use_container_width=True)
+    render_message(item)
 
 
 # =========================================================
@@ -393,7 +357,7 @@ def render_masters_screen():
     st.markdown("<div style='max-width: 1120px; margin: 0 auto;'>", unsafe_allow_html=True)
 
     st.markdown(
-        f"### Bem-vindo, **{st.session_state.display_name}**. Escolha seu mestre."
+        f"### Bem-vindo, **{get_owner_display()}**. Escolha seu mestre."
     )
 
     if st.session_state.selected_area:
@@ -401,7 +365,7 @@ def render_masters_screen():
 
     render_landing_screen(MASTERS, open_area)
 
-    c1, c2 = st.columns(2)
+    c1, _ = st.columns([1, 1])
 
     with c1:
         if st.button("Sair", use_container_width=True):
@@ -410,8 +374,6 @@ def render_masters_screen():
             st.session_state.selected_area = None
             st.session_state.current_conversation_id = None
             st.session_state.chat_history = []
-            st.session_state.show_materials_panel = False
-            clear_active_context()
             go_to_welcome()
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -423,6 +385,7 @@ def render_masters_screen():
 def render_chat_screen():
     area = st.session_state.selected_area
     owner = get_owner()
+    owner_display = get_owner_display()
 
     if not area:
         go_to_masters()
@@ -436,12 +399,14 @@ def render_chat_screen():
         st.session_state.chat_history = load_messages_for_conversation(cid)
 
     # =========================================================
-    # SIDEBAR NATIVA
+    # SIDEBAR
     # =========================================================
     with st.sidebar:
-        st.markdown("## Bridge to the Future")
-        st.caption(area_info.get("title", area))
-        st.caption(f"Professor: {owner}")
+        st.markdown('<div class="sidebar-brand">', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-brand-title">Bridge to the Future</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="sidebar-brand-sub">{area_info.get("title", area)}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="sidebar-brand-user">Professor {owner_display}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
         c1, c2 = st.columns(2)
 
@@ -454,8 +419,6 @@ def render_chat_screen():
                 new_id = create_new_conversation(area, owner)
                 st.session_state.current_conversation_id = new_id
                 st.session_state.chat_history = []
-                st.session_state.show_materials_panel = False
-                clear_active_context()
                 st.rerun()
 
         st.markdown("### Histórico")
@@ -481,21 +444,6 @@ def render_chat_screen():
                 if st.button("Abrir", key=f"open_conv_{conv['id']}", use_container_width=True):
                     open_conversation(conv["id"])
 
-        st.markdown("---")
-
-        if st.button("Base docente", use_container_width=True):
-            st.session_state.show_materials_panel = not st.session_state.show_materials_panel
-            st.rerun()
-
-        with st.expander("Materiais recentes", expanded=False):
-            rows = list_materials(limit=8, subject=area)
-            if rows:
-                for row in rows:
-                    st.markdown(f"**{row['title']}**")
-                    st.caption(f"{row['subject']} • {row['teacher_name'] or 'Professor não informado'}")
-            else:
-                st.caption("Nenhum material cadastrado.")
-
     # =========================================================
     # ÁREA PRINCIPAL
     # =========================================================
@@ -505,32 +453,11 @@ def render_chat_screen():
         f"""
         <div class="chat-topbar">
             <div class="chat-topbar-title">{area_info.get("title", area)}</div>
-            <div class="chat-topbar-meta">Professor: {owner}</div>
+            <div class="chat-topbar-meta">Professor {owner_display}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-
-    if st.session_state.show_materials_panel:
-        render_materials_admin(default_subject=area)
-
-    if st.session_state.context_file_name:
-        st.markdown(
-            f"""
-            <div class="context-chip">
-                <b>Contexto ativo:</b> {st.session_state.context_file_name} • {st.session_state.context_file_type}
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        clear_col1, clear_col2 = st.columns([0.22, 0.78], gap="small")
-        with clear_col1:
-            if st.button("Remover contexto", use_container_width=True):
-                clear_active_context()
-                st.rerun()
-        with clear_col2:
-            st.markdown("")
 
     for item in st.session_state.chat_history:
         render_chat_item(item)
@@ -555,37 +482,30 @@ def render_chat_screen():
 
         attached_labels = []
         image_paths = []
-        image_names = []
+        transient_context_text = None
+        transient_context_file_name = None
+        transient_context_file_type = None
 
         if uploaded_files:
             try:
                 processed = process_uploaded_files(uploaded_files)
                 attached_labels = processed["attached_labels"]
                 image_paths = processed["image_paths"]
-                image_names = processed["image_names"]
+                transient_context_text = processed["transient_context_text"]
+                transient_context_file_name = processed["transient_context_file_name"]
+                transient_context_file_type = processed["transient_context_file_type"]
             except Exception as e:
                 st.error(f"Erro ao processar arquivo: {e}")
                 st.stop()
 
-        # conteúdo do usuário
         clean_text = (user_input or "").strip()
         display_text = clean_text
-
-        # Se vier só imagem, não escreve "imagem enviada"
-        # deixa a imagem aparecer no chat e o texto pode ficar vazio
-        if not display_text and attached_labels and not image_paths:
-            display_text = "\n".join(attached_labels)
-        elif display_text and attached_labels:
-            display_text = f"{display_text}\n\n" + "\n".join(attached_labels)
 
         user_item = {
             "role": "user",
             "content": display_text,
             "image_path": image_paths[0] if image_paths else None,
-            "attachment_labels": attached_labels if not image_paths else [
-                label for label in attached_labels
-                if not label.lower().startswith("📎 image")
-            ],
+            "attachment_labels": attached_labels,
         }
 
         st.session_state.chat_history.append(user_item)
@@ -599,7 +519,6 @@ def render_chat_screen():
         graph_path = None
         graph_meta = {}
 
-        # tenta gráficos antes da IA apenas se houver texto
         if clean_text:
             try:
                 graph_result = maybe_generate_graph(clean_text, area)
@@ -625,11 +544,10 @@ def render_chat_screen():
             resposta = graph_meta.get("message", "Aqui está o gráfico solicitado.")
         elif geometry_path:
             resposta = geometry_caption or "Aqui está a demonstração visual."
-        elif clean_text and is_smalltalk(clean_text):
+        elif clean_text and is_smalltalk(clean_text) and not uploaded_files:
             resposta = greeting_reply()
         else:
             try:
-                # imagem anexada nesta mensagem = contexto momentâneo, não persistente
                 use_vision_now = should_use_vision(clean_text, image_paths)
 
                 if not clean_text and image_paths:
@@ -645,9 +563,9 @@ def render_chat_screen():
                         mentor=area,
                         profile="Professor",
                         history=st.session_state.chat_history[:-1],
-                        context_text=st.session_state.context_text,
-                        context_file_name=st.session_state.context_file_name,
-                        context_file_type=st.session_state.context_file_type,
+                        context_text=transient_context_text,
+                        context_file_name=transient_context_file_name,
+                        context_file_type=transient_context_file_type,
                     )
 
                     if use_vision_now and image_paths:
