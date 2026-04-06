@@ -97,11 +97,22 @@ def get_owner_display() -> str:
 
 def greeting_reply():
     respostas = [
-        "E aí! Bora planejar algo bom?",
+        "E aí! Bora planejar o que hoje?",
         "Fala! O que você quer montar hoje?",
-        "Manda a ideia 😄",
+        "Fala Mestre, Manda a ideia 😄",
         "Bora! Qual conteúdo?",
-        "Pode mandar 👊",
+        "Cuida,pode mandar 10! 👊",
+        "Qual a dúvida, Mestre?🫡",
+        "Em que posso ser útil hoje?",
+        "Como posso te salvar hoje?",
+        "Qual o B.O. de hoje?",
+        "Bora! Me deixa ser útilno que hoje",
+        "E aí, mestre! Quer ajuda em quê?",
+        "Fala, Professor! Qual a bomba do dia?",
+        "Como vai a vida docente, Mestre?",
+        
+        
+    
     ]
     return random.choice(respostas)
 
@@ -220,14 +231,14 @@ def suggest_area_from_text(user_text: str):
     if any(k in t for k in [
         "matemática", "matematica", "equação", "equacao", "função", "funcao",
         "bhaskara", "báscara", "álgebra", "algebra", "geometria",
-        "trigonometria", "derivada", "integral", "logaritmo"
+        "trigonometria", "derivada", "integral", "logaritmo", "Adenilson"
     ]):
         return "Matemática"
 
     if any(k in t for k in [
         "física", "fisica", "mru", "mruv", "força", "forca",
         "energia", "movimento", "velocidade", "aceleração", "aceleracao",
-        "gravidade", "newton", "projétil", "projetil"
+        "gravidade", "newton", "projétil", "projetil", "Orlando"
     ]):
         return "Física"
 
@@ -236,7 +247,7 @@ def suggest_area_from_text(user_text: str):
         "projeto cientifico", "projeto", "projeto pessoal",
         "hipótese", "hipotese", "tema", "objetivo",
         "justificativa", "problema de pesquisa",
-        "referencial", "iniciacao cientifica", "iniciação científica"
+        "referencial", "iniciacao cientifica", "iniciação científica","Francisco"
     ]):
         return "Metodologia Científica"
 
