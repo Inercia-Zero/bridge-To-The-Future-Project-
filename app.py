@@ -49,6 +49,7 @@ USERS = {
     "Adenilson": "1234",
     "Orlando": "1234",
     "Mesquita": "1234",
+    "Francisco": "1234",
 }
 
 
