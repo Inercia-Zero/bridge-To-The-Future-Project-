@@ -106,10 +106,11 @@ def greeting_reply():
         "Em que posso ser útil hoje?",
         "Como posso te salvar hoje?",
         "Qual o B.O. de hoje?",
-        "Bora! Me deixa ser útilno que hoje",
+        "Bora! Me deixa ser útil em que hoje",
         "E aí, mestre! Quer ajuda em quê?",
-        "Fala, Professor! Qual a bomba do dia?",
-        "Como vai a vida docente, Mestre?",
+        "Fala, Professor! Qual a bomba do dia? kkk",
+        "Qual a dúvida do dia?",
+        "Qual a boa do dia? kkk",
         
         
     
