@@ -1,6 +1,6 @@
 import re
 import unicodedata
-from masters import MENTORS
+from masters import MASTERS
 
 
 def normalize_text(text: str) -> str:
