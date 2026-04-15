@@ -3,55 +3,52 @@ from datetime import datetime
 
 DB_PATH = "mentoredu.db"
 
-
 def get_conn():
     return sqlite3.connect(DB_PATH, check_same_thread=False)
-
 
 def _column_exists(cursor, table_name: str, column_name: str) -> bool:
     cursor.execute(f"PRAGMA table_info({table_name})")
     columns = cursor.fetchall()
     return any(col[1] == column_name for col in columns)
 
-
 def init_db():
     conn = get_conn()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS conversations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL DEFAULT 'Nova conversa',
+                subject TEXT NOT NULL DEFAULT 'Geral',
+                owner_username TEXT NOT NULL DEFAULT 'global',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS conversations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL DEFAULT 'Nova conversa',
-            subject TEXT NOT NULL DEFAULT 'Geral',
-            owner_username TEXT NOT NULL DEFAULT 'global',
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-        )
-    """)
+        # Migrações seguras
+        if not _column_exists(cursor, "conversations", "subject"):
+            cursor.execute("ALTER TABLE conversations ADD COLUMN subject TEXT NOT NULL DEFAULT 'Geral'")
+        if not _column_exists(cursor, "conversations", "owner_username"):
+            cursor.execute("ALTER TABLE conversations ADD COLUMN owner_username TEXT NOT NULL DEFAULT 'global'")
 
-    if not _column_exists(cursor, "conversations", "subject"):
-        cursor.execute("ALTER TABLE conversations ADD COLUMN subject TEXT NOT NULL DEFAULT 'Geral'")
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                conversation_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                image_path TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+            _
+        """)
+        conn.commit()
+    finally:
+        conn.close()
 
-    if not _column_exists(cursor, "conversations", "owner_username"):
-        cursor.execute("ALTER TABLE conversations ADD COLUMN owner_username TEXT NOT NULL DEFAULT 'global'")
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            conversation_id INTEGER NOT NULL,
-            role TEXT NOT NULL,
-            content TEXT NOT NULL,
-            image_path TEXT,
-            created_at TEXT NOT NULL,
-            FOREIGN KEY (conversation_id) REFERENCES conversations (id)
-        )
-    """)
-
-    if not _column_exists(cursor, "messages", "image_path"):
-        cursor.execute("ALTER TABLE messages ADD COLUMN image_path TEXT")
-
-    conn.commit()
-    conn.close()
+# Aplique este padrão (try/finally) nas outras funções (save_message, list_conversations, etc.)
+# para garantir que conn.close() seja sempre chamado.
 
 
 def init_materials_table():
