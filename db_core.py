@@ -41,267 +41,181 @@ def init_db():
                 image_path TEXT,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (conversation_id) REFERENCES conversations(id)
-            _
+            )
         """)
         conn.commit()
     finally:
         conn.close()
 
-# Aplique este padrão (try/finally) nas outras funções (save_message, list_conversations, etc.)
-# para garantir que conn.close() seja sempre chamado.
-
-
 def init_materials_table():
     conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS materials (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            teacher_name TEXT,
-            content TEXT,
-            file_name TEXT,
-            file_path TEXT,
-            created_at TEXT NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                teacher_name TEXT,
+                content TEXT,
+                file_name TEXT,
+                file_path TEXT,
+                created_at TEXT NOT NULL
+            )
+        """)
+        conn.commit()
+    finally:
+        conn.close()
 
 # =========================================================
 # CONVERSAS
 # =========================================================
+
 def ensure_default_conversation(subject: str, owner_username: str) -> int:
     conn = get_conn()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id FROM conversations
+            WHERE subject = ? AND owner_username = ?
+            ORDER BY updated_at DESC LIMIT 1
+        """, (subject, owner_username))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            return create_new_conversation(subject, owner_username)
+    finally:
+        conn.close()
 
-    cursor.execute("""
-        SELECT id
-        FROM conversations
-        WHERE subject = ? AND owner_username = ?
-        ORDER BY updated_at DESC
-        LIMIT 1
-    """, (subject, owner_username))
-
-    row = cursor.fetchone()
-
-    if row:
-        conv_id = row[0]
-    else:
+def create_new_conversation(subject: str, owner_username: str, title: str = "Nova conversa") -> int:
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
         now = datetime.now().isoformat()
         cursor.execute("""
             INSERT INTO conversations (title, subject, owner_username, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?)
-        """, ("Nova conversa", subject, owner_username, now, now))
+        """, (title, subject, owner_username, now, now))
         conn.commit()
-        conv_id = cursor.lastrowid
-
-    conn.close()
-    return conv_id
-
+        return cursor.lastrowid
+    finally:
+        conn.close()
 
 def get_active_conversation_id(subject: str, owner_username: str):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT id
-        FROM conversations
-        WHERE subject = ? AND owner_username = ?
-        ORDER BY updated_at DESC
-        LIMIT 1
-    """, (subject, owner_username))
-
-    row = cursor.fetchone()
-    conn.close()
-
-    return row[0] if row else None
-
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id FROM conversations
+            WHERE subject = ? AND owner_username = ?
+            ORDER BY updated_at DESC LIMIT 1
+        """, (subject, owner_username))
+        row = cursor.fetchone()
+        return row[0] if row else None
+    finally:
+        conn.close()
 
 def list_conversations_by_mentor(subject: str, owner_username: str):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT id, title, subject, owner_username, created_at, updated_at
-        FROM conversations
-        WHERE subject = ? AND owner_username = ?
-        ORDER BY updated_at DESC
-    """, (subject, owner_username))
-
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [
-        {
-            "id": row[0],
-            "title": row[1],
-            "subject": row[2],
-            "owner_username": row[3],
-            "created_at": row[4],
-            "updated_at": row[5],
-        }
-        for row in rows
-    ]
-
-
-def create_new_conversation(subject: str, owner_username: str, title: str = "Nova conversa") -> int:
-    conn = get_conn()
-    cursor = conn.cursor()
-
-    now = datetime.now().isoformat()
-
-    cursor.execute("""
-        INSERT INTO conversations (title, subject, owner_username, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-    """, (title, subject, owner_username, now, now))
-
-    conn.commit()
-    conv_id = cursor.lastrowid
-    conn.close()
-    return conv_id
-
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, title, subject, owner_username, created_at, updated_at
+            FROM conversations
+            WHERE subject = ? AND owner_username = ?
+            ORDER BY updated_at DESC
+        """, (subject, owner_username))
+        rows = cursor.fetchall()
+        return [
+            {"id": r[0], "title": r[1], "subject": r[2], "owner_username": r[3], "created_at": r[4], "updated_at": r[5]}
+            for r in rows
+        ]
+    finally:
+        conn.close()
 
 def renomear_conversa(conversation_id: int, novo_nome: str):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    now = datetime.now().isoformat()
-
-    cursor.execute("""
-        UPDATE conversations
-        SET title = ?, updated_at = ?
-        WHERE id = ?
-    """, (novo_nome, now, conversation_id))
-
-    conn.commit()
-    conn.close()
-
+    try:
+        cursor = conn.cursor()
+        now = datetime.now().isoformat()
+        cursor.execute("UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?", (novo_nome, now, conversation_id))
+        conn.commit()
+    finally:
+        conn.close()
 
 def deletar_conversa(conversation_id: int):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM messages WHERE conversation_id = ?", (conversation_id,))
-    cursor.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
-
-    conn.commit()
-    conn.close()
-
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM messages WHERE conversation_id = ?", (conversation_id,))
+        cursor.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
+        conn.commit()
+    finally:
+        conn.close()
 
 # =========================================================
 # MENSAGENS
 # =========================================================
+
 def save_message(conversation_id: int, role: str, content: str, image_path: str | None = None):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    now = datetime.now().isoformat()
-
-    cursor.execute("""
-        INSERT INTO messages (conversation_id, role, content, image_path, created_at)
-        VALUES (?, ?, ?, ?, ?)
-    """, (conversation_id, role, content, image_path, now))
-
-    cursor.execute("""
-        UPDATE conversations
-        SET updated_at = ?
-        WHERE id = ?
-    """, (now, conversation_id))
-
-    conn.commit()
-    conn.close()
-
+    try:
+        cursor = conn.cursor()
+        now = datetime.now().isoformat()
+        cursor.execute("""
+            INSERT INTO messages (conversation_id, role, content, image_path, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (conversation_id, role, content, image_path, now))
+        cursor.execute("UPDATE conversations SET updated_at = ? WHERE id = ?", (now, conversation_id))
+        conn.commit()
+    finally:
+        conn.close()
 
 def load_messages_for_conversation(conversation_id: int):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT role, content, image_path, created_at
-        FROM messages
-        WHERE conversation_id = ?
-        ORDER BY id ASC
-    """, (conversation_id,))
-
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [
-        {
-            "role": row[0],
-            "content": row[1],
-            "image_path": row[2],
-            "created_at": row[3],
-        }
-        for row in rows
-    ]
-
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT role, content, image_path, created_at
+            FROM messages WHERE conversation_id = ? ORDER BY id ASC
+        """, (conversation_id,))
+        rows = cursor.fetchall()
+        return [{"role": r[0], "content": r[1], "image_path": r[2], "created_at": r[3]} for r in rows]
+    finally:
+        conn.close()
 
 # =========================================================
 # MATERIAIS
 # =========================================================
-def add_material(
-    title: str,
-    subject: str,
-    teacher_name: str | None = None,
-    content: str | None = None,
-    file_name: str | None = None,
-    file_path: str | None = None,
-):
+
+def add_material(title, subject, teacher_name=None, content=None, file_name=None, file_path=None):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    now = datetime.now().isoformat()
-
-    cursor.execute("""
-        INSERT INTO materials (title, subject, teacher_name, content, file_name, file_path, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (title, subject, teacher_name, content, file_name, file_path, now))
-
-    conn.commit()
-    material_id = cursor.lastrowid
-    conn.close()
-    return material_id
-
+    try:
+        cursor = conn.cursor()
+        now = datetime.now().isoformat()
+        cursor.execute("""
+            INSERT INTO materials (title, subject, teacher_name, content, file_name, file_path, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (title, subject, teacher_name, content, file_name, file_path, now))
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
 
 def list_materials(limit: int = 10, subject: str | None = None):
     conn = get_conn()
-    cursor = conn.cursor()
-
-    if subject:
-        cursor.execute("""
-            SELECT id, title, subject, teacher_name, content, file_name, file_path, created_at
-            FROM materials
-            WHERE subject = ?
-            ORDER BY created_at DESC
-            LIMIT ?
-        """, (subject, limit))
-    else:
-        cursor.execute("""
-            SELECT id, title, subject, teacher_name, content, file_name, file_path, created_at
-            FROM materials
-            ORDER BY created_at DESC
-            LIMIT ?
-        """, (limit,))
-
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [
-        {
-            "id": row[0],
-            "title": row[1],
-            "subject": row[2],
-            "teacher_name": row[3],
-            "content": row[4],
-            "file_name": row[5],
-            "file_path": row[6],
-            "created_at": row[7],
-        }
-        for row in rows
-    ]
+    try:
+        cursor = conn.cursor()
+        if subject:
+            cursor.execute("SELECT * FROM materials WHERE subject = ? ORDER BY created_at DESC LIMIT ?", (subject, limit))
+        else:
+            cursor.execute("SELECT * FROM materials ORDER BY created_at DESC LIMIT ?", (limit,))
+        rows = cursor.fetchall()
+        return [
+            {"id": r[0], "title": r[1], "subject": r[2], "teacher_name": r[3], "content": r[4], 
+             "file_name": r[5], "file_path": r[6], "created_at": r[7]}
+            for r in rows
+        ]
+    finally:
+        conn.close()
